@@ -20,20 +20,27 @@
     "e2e": "playwright test"
   },
   "dependencies": {
-    "electron-updater": "^6.1.1"
+    "@nextui-org/react": "^2.2.9",
+    "@radix-ui/themes": "^2.0.3",
+    "electron-updater": "^6.1.1",
+    "framer-motion": "^11.0.3",
+    "lucide-react": "^0.323.0",
+    "react-router-dom": "^6.22.0",
+    "sweetalert2": "^11.10.5",
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.37.1",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.4",
-    "autoprefixer": "^10.4.16",
+    "autoprefixer": "^10.4.17",
     "electron": "^28.1.0",
     "electron-builder": "^24.6.3",
-    "postcss": "^8.4.31",
+    "postcss": "^8.4.35",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tailwindcss": "^3.3.3",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.1.6",
     "vite": "^5.0.10",
     "vite-plugin-electron": "^0.28.0",
