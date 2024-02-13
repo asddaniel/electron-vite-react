@@ -4,10 +4,12 @@ import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
 import './App.css'
 import Sidebar from './layouts/Sidebar'
 import Home from './pages/Home'
+import Facturation from './pages/Facturation'
 import { useLayoutWidth, LayouType } from './utils/Store'
 import { motion } from 'framer-motion'
 import Stock from './pages/Stock'
 import { NextUIProvider } from '@nextui-org/react'
+
 
 function App() {
   const {page, sidebar} = useLayoutWidth() as LayouType
@@ -29,6 +31,7 @@ function App() {
               <Route>
                 <Route path='/' element={<Home />} />
                 <Route path='/stock' element={<Stock />} />
+                <Route path='/facturation' element={<Facturation />} />
               </Route>
        </Routes>
    </div>

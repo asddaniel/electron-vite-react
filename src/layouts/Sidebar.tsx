@@ -26,8 +26,8 @@ export default function Sidebar() {
         setOpenMenu(!openMenu)
     }
     return (<>
-            <div className={" h-screen py-6 "+(sidebar=="full"?"w-64":"w-16")}>
-        <Card className="h-5/6 p-3 bg-slate-800 shadow-lg">
+            <div className={" h-screen py-6 fixed transition-all duration-300 w-16  "+(sidebar=="full"?"lg:w-64":"lg:w-16")}>
+        <Card className="lg:h-5/6 h-full p-3 bg-slate-800 shadow-lg">
         
         <motion.div layout className="flex justify-end px-3">
         {openMenu? <MenuIcon onClick={()=>updateLayout(true)} className="hover:scale-110 cursor-pointer font-bold transition-all duration-300 text-white "/>:<XCircleIcon onClick={()=>updateLayout(false)} className="hover:scale-110 cursor-pointer font-bold transition-all duration-300 text-white "/>}
