@@ -102,10 +102,10 @@ export type ProduitType = {
 export class Client extends models.Model {
     id = models.IntegerField({primaryKey: true})
     name = models.CharField({maxLength:255})
-    tel  = models.CharField({maxLength:255})
-    email = models.CharField({maxLength:255});
+    tel  = models.CharField({maxLength:255, blank:true})
+    email = models.CharField({maxLength:255, blank:true});
     is_deleted = models.BooleanField({default: false})
-    created_at = models.DateTimeField()
+    created_at = models.DateTimeField({blank:true})
     updated_at = models.DateTimeField({blank:true})
     deleted_at = models.DateTimeField({blank:true})
     special_id = models.CharField({maxLength: 100})
@@ -114,6 +114,32 @@ export class Client extends models.Model {
 export type ClientType = {
     id?:number;
     name:string;
+    tel?:string;
+    email?:string;
+    created_at?:Date | string;
+    updated_at?:Date | string;
+    deleted_at?:Date | string;
+    is_deleted?:boolean;
+    special_id:string;
+}
+
+export class Reduction extends models.Model{
+    id = models.IntegerField({primaryKey: true})
+    is_deleted = models.BooleanField({default: false})
+    montant = models.BigIntegerField()
+    facture = models.ForeignKey({model:Facture})
+    pourcentage = models.IntegerField()
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField({blank:true})
+    deleted_at = models.DateTimeField({blank:true})
+    special_id = models.CharField({maxLength: 100})
+}
+
+export type ReductionType = {
+    id?:number;
+    montant?:string|number;
+    pourcentage?:number;
+    facture:Facture;
     created_at?:Date | string;
     updated_at?:Date | string;
     deleted_at?:Date | string;
@@ -126,7 +152,7 @@ export class Facture extends models.Model{
     Client = models.ForeignKey({model: Client})
     numfacture = models.CharField({maxLength:255})
     is_paid = models.BooleanField({default:false})
-    User = models.ForeignKey({model: User})
+    User = models.ForeignKey({model: User, blank:true})
     is_deleted = models.BooleanField({default: false})
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField({blank:true}) 
