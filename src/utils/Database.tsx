@@ -14,7 +14,7 @@ export class User extends models.Model{
   password = models.CharField({maxLength: 100})
   telephone = models.CharField({maxLength: 100})
   is_deleted = models.BooleanField({default: false})
-  created_at = models.DateTimeField()
+  created_at = models.DateTimeField({blank:true})
   updated_at = models.DateTimeField({blank:true})
   deleted_at = models.DateTimeField({blank:true})
   special_id = models.CharField({maxLength: 100})
@@ -152,8 +152,9 @@ export class Facture extends models.Model{
     Client = models.ForeignKey({model: Client})
     numfacture = models.CharField({maxLength:255})
     is_paid = models.BooleanField({default:false})
-    User = models.ForeignKey({model: User, blank:true})
+    User = models.ForeignKey({model: User, blank:true, default:{}})
     is_deleted = models.BooleanField({default: false})
+    Reduction = models.ForeignKey({model: Reduction, blank:true})
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField({blank:true}) 
     deleted_at = models.DateTimeField({blank:true})
@@ -326,6 +327,6 @@ export class LigneFacture extends models.Model {
     version:1, 
     type: "indexedDB", 
     models: [User, Role, Categorie, Produit, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison,
-            CodeBarre, RoleUser]
+            CodeBarre, RoleUser, Reduction]
  })
  //models.migrate();

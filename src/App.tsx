@@ -9,6 +9,7 @@ import { useLayoutWidth, LayouType } from './utils/Store'
 import { motion } from 'framer-motion'
 import Stock from './pages/Stock'
 import { NextUIProvider } from '@nextui-org/react'
+import Users from './pages/Users'
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
                 <Route path='/' element={<Home />} />
                 <Route path='/stock' element={<Stock />} />
                 <Route path='/facturation' element={<Facturation />} />
+                <Route path='/users' element={<Users />} />
               </Route>
        </Routes>
    </div>

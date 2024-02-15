@@ -66,7 +66,7 @@ export default function Facturation (){
         const newclient = await Client.create({
           ...datatoAdd.clients,
           special_id:special_id,
-          id:length
+          id:lenght
         })
         setdata({
           ...data,
@@ -203,7 +203,7 @@ export default function Facturation (){
           id:all.length,
           is_deleted:false,
           is_paid:false,
-          numfacture:new Date().toLocaleDateString().toString()+Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+          numfacture:new Date().toLocaleDateString().toString()+Math.random().toString(36).substring(2, 15),
         })
         setdata({
           ...data, 
@@ -381,7 +381,7 @@ export default function Facturation (){
                          <TableCell>
                              <div className="flex gap-2 items-center justify-center">
                              <EyeIcon className="w-5 h-5 cursor-pointer" />
-                             <Trash2 className="w-5 h-5 cursor-pointer" />
+                             <Trash2 className="w-5 h-5 cursor-pointer" onClick={()=>deleteClient(client.special_id)} />
                              <Popover placement="bottom" showArrow={true} onOpenChange={(e)=>{
                                 if(e){
                                     setdatatoAdd({...datatoAdd,clients:client})
