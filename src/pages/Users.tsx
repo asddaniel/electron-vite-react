@@ -83,7 +83,7 @@ export default function Users (){
 
     const updateUser = async(special_id:string)=>{
         if(datatoAdd.password.length > 0){
-            const salt = await bcrypt.salt(9)
+            const salt = await bcrypt.genSalt(9)
             const hash = await bcrypt.hash(datatoAdd.password, salt)
             User.filter({special_id:special_id}).update({
                 ...datatoAdd,
@@ -124,7 +124,8 @@ export default function Users (){
             confirmButtonText: "Oui, supprimer!",
         }).then((confirm)=>{
             if(confirm.isConfirmed){
-                User.filter({special_id:special_id}).update({is_deleted:true, deleted_at:new Date().toLocaleDateString()})
+                console.log(special_id + " is confirmed")
+                User.filter({special_id:special_id}).update({is_deleted:true, deleted_at:new Date()})
                 setusers(users.filter((user:Usertype)=>user.special_id!=special_id))
                 Swal.fire(
                     "Supprimé!",
@@ -224,7 +225,7 @@ export default function Users (){
                                         </div>
                                     </PopoverContent>
                                    </Popover>
-                                    <Trash2 className="cursor-pointer" onClick={()=>deleteUser(datatoAdd.special_id)} />
+                                    <Trash2 className="cursor-pointer" onClick={()=>deleteUser(user.special_id)} />
                                 </TableCell>
                             </TableRow>
                         ))}

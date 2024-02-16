@@ -31,7 +31,7 @@ export default function Stock (){
     const [modalFournisseur, setModalFournisseur] = useState(false);
     const [modalApprovisionnement, setModalApprovisionnement] = useState(false);
     const [modalCategorie, setModalCategorie] = useState(false);
-    const [filterDate, setFilterDate] = useState({startDate:new Date().getDate()-1, endDate:new Date()})
+    const [filterDate, setFilterDate] = useState({startDate:new Date(Date.now()-86400000), endDate:new Date()})
     const [toSearch, setTosearch] = useState({categories:"", products:{produit:"", categorie:""}, fournisseurs:"", approvisionnements:""})
     const [localdata, setlocaldata] = useState<localdataType>({categories:[], products:[], approvisionnements:[], fournisseurs:[]})
     const [dataToAdd, setDatatoAdd] = useState<localdataTypeSingle>({

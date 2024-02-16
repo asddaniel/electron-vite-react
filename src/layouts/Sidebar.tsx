@@ -87,10 +87,10 @@ export default function Sidebar() {
                
             </Link>
             <div className="flex flex-col justify-evenly pt-6">
-                <div className="hover:bg-gray-800 hover:shadow-lg transition-all duration-300 py-1 text-white rounded  p-2 flex justify-start gap-2 items-center">
+                <Link to={"/login"} className="hover:bg-gray-800 hover:shadow-lg transition-all duration-300 py-1 text-white rounded  p-2 flex justify-start gap-2 items-center">
                     <LogOutIcon  />
                    { sidebar=="full" &&<button className="hidden lg:block bg-transparent text-inherit text-start text-2xl font-light rounded-xl outline-none border-none   "> Log out </button>}
-                </div>
+                </Link>
                
             </div>
         </Card>
