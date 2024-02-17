@@ -24,6 +24,7 @@
     "@radix-ui/themes": "^2.0.3",
     "bcryptjs": "^2.4.3",
     "beast-orm": "^1.1.5",
+    "bwip-js": "^4.2.0",
     "dexie": "^3.2.5",
     "dexie-react-hooks": "^1.1.7",
     "electron-updater": "^6.1.1",

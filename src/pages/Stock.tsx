@@ -6,24 +6,48 @@ import Swal from "sweetalert2"
 import { Modal, ModalContent } from "@nextui-org/react"
 import { useEffect, useState } from "react"
 import { RadioGroup, Radio } from "@nextui-org/react"
-import { Produit, ProduitType, Fournisseur, FournisseurType,  Approvisionnement, ApprovisionnementType, Categorie, CategorieType } from "@/utils/Database"
+import { Produit, ProduitType, Fournisseur, FournisseurType,  Approvisionnement, ApprovisionnementType, Categorie,
+     CategorieType,  CodeBarreType } from "@/utils/Database"
 // import { models } from "@/utils/beast"
 // import { db } from "@/utils/Database"
 import { User, Role,  Client, Facture, LigneFacture, Livraison,
     CodeBarre, RoleUser } from '@/utils/Database'
     import Datepicker from "react-tailwindcss-datepicker"; 
+    import { generateAlphaNumericString } from "@/utils/Facade"
+    import { Spinner } from "@nextui-org/react"
+    import BwipJs from "bwip-js"
 
 interface localdataType {
     categories: CategorieType[],
     products:ProduitType[],
     approvisionnements:ApprovisionnementType[],
     fournisseurs:FournisseurType[],
+    codebarres:CodeBarreType[]
 }
 interface localdataTypeSingle {
     categorie: CategorieType,
     products:ProduitType,
     approvisionnements:ApprovisionnementType,
     fournisseur:FournisseurType | null,
+}
+const toSvg = (code:string)=>{
+    return BwipJs.toSVG({
+        bcid:        'code128',       // Barcode type
+        text:        code,    // Text to encode
+        height:      12,              // Bar height, in millimeters
+        includetext: true,            // Show human-readable text
+        textxalign:  'center',        // Always good to set this
+        textcolor:   'ff0000',        // Red text
+    });
+}
+export type FilterCodeBarreType = {
+    time: {
+        startDate: Date
+        endDate: Date
+    }, 
+    Produit: ProduitType|null,
+    Fournisseur: FournisseurType|null,
+    Approvisionnement:ApprovisionnementType|null,
 }
 
 export default function Stock (){
@@ -33,7 +57,8 @@ export default function Stock (){
     const [modalCategorie, setModalCategorie] = useState(false);
     const [filterDate, setFilterDate] = useState({startDate:new Date(Date.now()-86400000), endDate:new Date()})
     const [toSearch, setTosearch] = useState({categories:"", products:{produit:"", categorie:""}, fournisseurs:"", approvisionnements:""})
-    const [localdata, setlocaldata] = useState<localdataType>({categories:[], products:[], approvisionnements:[], fournisseurs:[]})
+    const [localdata, setlocaldata] = useState<localdataType>({categories:[], products:[],
+         approvisionnements:[], fournisseurs:[], codebarres:[]})
     const [dataToAdd, setDatatoAdd] = useState<localdataTypeSingle>({
         products:{name:"", quantite:0,  prix:0, Categorie:null, special_id:"", created_at:new Date(), updated_at:new Date(), is_deleted:false}, 
         fournisseur:null,
@@ -41,6 +66,12 @@ export default function Stock (){
         approvisionnements:{special_id:"", Produit:({} as ProduitType), quantite:0, prix:0, Fournisseur:{} as FournisseurType, created_at:new Date(), updated_at:new Date(), is_deleted:false}
 
     })
+    const [filtercodebarres, setfiltercodebarres] = useState({
+        time:{startDate:new Date(Date.now()-86400000), endDate:new Date()}, 
+        Produit:null,
+        Fournisseur:null,
+        Approvisionnement:null 
+    } satisfies FilterCodeBarreType)
     const [dataToEdit, setDatatoEdit] = useState<localdataTypeSingle>({
         products:{} as ProduitType, 
         fournisseur:{} as FournisseurType, 
@@ -48,22 +79,25 @@ export default function Stock (){
         approvisionnements:{} as ApprovisionnementType
 
     })
+    const [isloading, setisloading] = useState(false);
     useEffect(()=>{
         
         //  console.log(models)
-        Promise.all([Categorie.all(), Produit.all(), Fournisseur.all(), Approvisionnement.all()])
-        .then(([categories, products, fournisseurs, approvisionnements])=>{
+        Promise.all([Categorie.all(), Produit.all(), Fournisseur.all(), Approvisionnement.all(), CodeBarre.all(),])
+        .then(([categories, products, fournisseurs, approvisionnements, codebarres])=>{
             categories = categories.filter((cat)=>cat.is_deleted == false);
             products = products.filter((prod)=>prod.is_deleted == false);
             fournisseurs = fournisseurs.filter((four)=>four.is_deleted == false);
             approvisionnements = approvisionnements.filter((appro)=>appro.is_deleted == false);
-            console.log(categories, products, fournisseurs, approvisionnements)
+            codebarres = codebarres.filter(c=>c.is_deleted == false);
+            // console.log(categories, products, fournisseurs, approvisionnements)
            
             setlocaldata({
                 categories:categories,
                 products:products,
                 fournisseurs:fournisseurs,
-                approvisionnements:approvisionnements
+                approvisionnements:approvisionnements, 
+                codebarres:codebarres
             })
         })
             
@@ -138,7 +172,7 @@ export default function Stock (){
            lenghtproduit = lenghtproduit.length
             const prod = await Produit.create({name:dataToAdd.products.name, 
                 special_id:special_id,
-                created_at:new Date().toLocaleDateString(), 
+                created_at:new Date(), 
                 id:lenghtproduit,  
                 quantite:dataToAdd.products.quantite,
                 prix:dataToAdd.products.prix,
@@ -213,7 +247,7 @@ export default function Stock (){
             const special_id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
             const four = await Fournisseur.create({...dataToAdd.fournisseur, 
                 special_id:special_id,
-                created_at:new Date().toLocaleDateString(), 
+                created_at:new Date(), 
                 id:localdata.fournisseurs.length, 
                 updated_at:(new Date()), 
             is_deleted:false})
@@ -281,22 +315,13 @@ export default function Stock (){
             const special_id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
             const app = await Approvisionnement.create({...dataToAdd.approvisionnements,
                 special_id:special_id,
-                created_at:new Date().toLocaleDateString(), 
+                created_at:new Date(), 
                 id:lengthapprovisionnement, 
                 updated_at:new Date(), 
             is_deleted:false})
             console.log(dataToAdd.approvisionnements)
             Produit.filter({special_id:dataToAdd.approvisionnements.Produit.special_id}).update({quantite:Number(dataToAdd.approvisionnements.Produit.quantite) + Number(dataToAdd.approvisionnements.quantite)})
-           // const refetchproduits = await Produit.all()
-            // setlocaldata({
-            //     ...localdata,
-            //     products:localdata.products.map((prod)=>{
-            //         if(prod.special_id == dataToAdd.approvisionnements.Produit.special_id){
-            //             return {...prod, quantite:Number(prod.quantite) + Number(dataToAdd.approvisionnements.quantite)}
-            //         }
-            //         return prod
-            //     })
-            // })
+           
             setlocaldata({
                 ...localdata,
                 approvisionnements:[...localdata.approvisionnements, app],
@@ -385,9 +410,51 @@ export default function Stock (){
             }
           });
     }
+    const generateCodeBarre = async (approvisionnement:ApprovisionnementType)=>{
+            const numbercode = localdata.codebarres.filter(code=>code.Approvisionnement.special_id==approvisionnement.special_id)
+            if(numbercode.length<approvisionnement.quantite){
+                setisloading(true);
+                const numbertoadd = approvisionnement.quantite - numbercode.length;
+                for(let i=0;i<numbertoadd;i++){
+                    //generate random alphanumeric string of length 10
+                    const all = await CodeBarre.all();
+                    const randomcode = generateAlphaNumericString(10);
+                    const special_id = generateAlphaNumericString(20);
+                    const code = await CodeBarre.create({
+                            special_id: special_id,
+                            Approvisionnement:approvisionnement,
+                            id:all.length, 
+                            codebarre:randomcode,
+                            created_at:new Date(),
+                            Produit:approvisionnement.Produit,
+                            is_deleted:false,
+                    })
+                    setlocaldata({
+                        ...localdata,
+                        codebarres:[...localdata.codebarres, code]
+                    })
+                }
+                
+                Swal.fire({
+                    title:"Réussi", 
+                    text:"Code barre generée avec succès",
+                    icon:"success",
+                })
+                setisloading(false);
+                return
+            }
+            Swal.fire({
+                title:"Oops...", 
+                text:"impossible de générer le code pour des produits déjà codifié",
+                icon:"error"
+            })
+        }
 
     return (
         <div className="w-full bg-inherit font-inherit font-sans ">
+            {isloading && <div className="absolute z-20 backdrop-blur-sm rounded w-full h-full flex justify-center text-center items-center">
+                    <Spinner size="lg" />
+            </div>}
             <Modal isOpen={modalProduct} onClose={() => setModalProduct(false)} size="5xl" >
             
                 <ModalContent>
@@ -844,9 +911,15 @@ export default function Stock (){
                     </PopoverContent>
                    </Popover>
                    <Trash2 onClick={()=>deleteApprovisionnement(app.special_id)} className="cursor-pointer"/>
-                   <Tooltip showArrow={true} content="Generer code bar " color="success">
-                        <BarcodeIcon className="cursor-pointer" />
+                   
+                    {localdata.codebarres.filter(code=>code.Approvisionnement.special_id==app.special_id).length < app.quantite ? (
+                            <Tooltip showArrow={true} content="Generer code bar " color="success">
+                                <BarcodeIcon className="cursor-pointer" onClick={()=>generateCodeBarre(app)} />
                    </Tooltip>
+                    ):<Tooltip showArrow={true} content="codebarre existant" color="warning">
+                    <BarcodeIcon className="cursor-not-allowed" />
+       </Tooltip>}
+                        
                    
                 </div>
             </TableCell>
@@ -856,7 +929,67 @@ export default function Stock (){
 
                         </div>
                     </Tab>
-                    <Tab key={"stat"} className="border-none" title="Stat">Stat</Tab>
+                    <Tab key={"codeBarre"} className="border-none" title="CodeBarres">
+                        <div className="py-5">
+                            <div className="w-full p-2">
+                            <Select label="Produit" className="py-2" onChange={(e)=>{setfiltercodebarres({...filtercodebarres, Produit:(localdata.products.find(p=>p.special_id == e.target.value) as any), })}}>
+                                            {localdata.products.map((product)=>(
+                                                <SelectItem key={product.special_id} value={product.special_id}>{product.name}</SelectItem>
+                                            ))}
+                                </Select>
+                                <Select label="Fournisseur" className="py-2" onChange={(e)=>{
+                                    setfiltercodebarres({...filtercodebarres, Fournisseur:(localdata.fournisseurs.find(f=>f.special_id == e.target.value) as any), })
+                                }}>
+                                        {localdata.fournisseurs.map((fournisseur)=>(
+                                            <SelectItem key={fournisseur.special_id} value={fournisseur.special_id}>{fournisseur.name}</SelectItem>
+                                        ))}
+                                </Select>
+                                <Select label="Approvisionnement" className="py-2" onChange={(e)=>{
+                                    setfiltercodebarres({...filtercodebarres, Approvisionnement:(localdata.approvisionnements.find(f=>f.special_id == e.target.value) as any), })
+                                }}>
+                                        {localdata.approvisionnements.filter((app)=>app.Fournisseur.special_id == (filtercodebarres.Fournisseur as any)?.special_id  && app.Produit.special_id == (filtercodebarres.Produit as any)?.special_id).map((app)=>(
+                                            <SelectItem key={app.special_id} value={app.special_id}>{app?.created_at?.toString()}</SelectItem>
+                                        ))}
+                                </Select>
+                               
+                                <div className="py-2">
+                                    <Datepicker popoverDirection="down"  value={filtercodebarres.time} onChange={(e)=>{
+                                        setfiltercodebarres({...filtercodebarres, time:{startDate:new Date(e?.startDate as any), endDate:new Date((e?.endDate as any))}})
+                                    }} />
+                                </div>
+
+                            </div>
+                        </div>
+                        <div className="py-3">
+                            <Card className="p-2">
+                                <div className="font-bold text-xl"> Total {localdata.codebarres.filter(code=>code.Approvisionnement.special_id==(filtercodebarres.Approvisionnement as any)?.special_id && (code.Approvisionnement.created_at as any)>=filtercodebarres.time.startDate && (code.Approvisionnement.created_at as any)<=filtercodebarres.time.endDate).length} codes</div>
+                            </Card>
+                        </div>
+                        <div className="py-4">
+                            <Table aria-label="liste des code barres des produits">
+                                <TableHeader>
+                                 
+                                        <TableColumn>Produit</TableColumn>
+                                        <TableColumn>CodeBarre</TableColumn>
+                                        <TableColumn>Fournisseur</TableColumn>
+                                        <TableColumn>Date de fournitures</TableColumn>
+                                   
+                                </TableHeader>
+                                <TableBody>
+                                    {localdata.codebarres.filter(code=>code.Approvisionnement.special_id==(filtercodebarres.Approvisionnement as any)?.special_id && (code.Approvisionnement.created_at as any)>=filtercodebarres.time.startDate && (code.Approvisionnement.created_at as any)<=filtercodebarres.time.endDate).map((code, index)=>(
+                                        <TableRow key={index}>
+                                            <TableCell>{code.Produit.name}</TableCell>
+                                            <TableCell>
+                                            <div dangerouslySetInnerHTML={{__html:toSvg(code.codebarre)}}></div>
+                                            </TableCell>
+                                            <TableCell>{code.Approvisionnement.Fournisseur.name}</TableCell>
+                                            <TableCell>{code.Approvisionnement?.created_at?.toLocaleDateString("fr-FR")}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </Tab>
                     
                 </Tabs>
             </div>
