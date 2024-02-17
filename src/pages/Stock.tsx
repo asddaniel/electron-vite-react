@@ -559,7 +559,7 @@ export default function Stock (){
                         <TableColumn>Quantité</TableColumn>
                         <TableColumn>Actions</TableColumn>
                     </TableHeader>
-      <TableBody emptyContent={"aucun produit disponible."}>{(localdata.products || []).filter((produit)=>produit.name.toLowerCase().includes(toSearch.products.produit.toLowerCase()) && produit.Categorie.name.includes(toSearch.products.categorie)).map((produit, index)=>(
+      <TableBody emptyContent={"aucun produit disponible."}>{(localdata.products || []).filter((produit)=>produit?.name?.toLowerCase()?.includes(toSearch.products.produit.toLowerCase()) && produit.Categorie.name.includes(toSearch.products.categorie)).map((produit, index)=>(
         <TableRow key={index}>
              <TableCell>{index+1}</TableCell>
             <TableCell>{produit.name}</TableCell>

@@ -247,6 +247,32 @@ export class LigneFacture extends models.Model {
     deleted_at = models.DateTimeField({blank:true})
     special_id = models.CharField({maxLength: 100})
  }
+
+
+ export class Paiement extends models.Model{
+    id = models.IntegerField({primaryKey:true});
+    Facture = models.ForeignKey({model:Facture})
+    usd = models.BigIntegerField({blank:true})
+    cdf = models.BigIntegerField({blank:true})
+    taux = models.BigIntegerField({blank:true})
+    is_deleted = models.BooleanField({default:false})
+    created_at = models.DateTimeField({blank:true})
+    updated_at = models.DateTimeField({blank:true})
+    deleted_at = models.DateTimeField({blank:true})
+    special_id = models.CharField({maxLength: 100})
+
+ }
+ export type PaiementType = {
+    id?:number;
+    Facture:FactureType;
+    usd:number;
+    cdf:number;
+    taux:number;
+    is_deleted?:boolean;
+    created_at?:Date;
+    updated_at?:Date;
+    special_id:string;
+ }
  export type RoleUserType = {
     id?: number;
     Role: RoleType;
@@ -327,6 +353,6 @@ export class LigneFacture extends models.Model {
     version:1, 
     type: "indexedDB", 
     models: [User, Role, Categorie, Produit, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison,
-            CodeBarre, RoleUser, Reduction]
+            CodeBarre, RoleUser, Reduction, Paiement]
  })
  //models.migrate();

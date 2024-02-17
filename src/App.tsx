@@ -11,6 +11,7 @@ import Stock from './pages/Stock'
 import { NextUIProvider } from '@nextui-org/react'
 import Users from './pages/Users'
 import Login from './pages/Login'
+import Caisse from './pages/Caisse'
 
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
                 <Route path='/facturation' element={<Facturation />} />
                 <Route path='/users' element={<Users />} />
                 <Route path='/login' element={<Login />} />
+                <Route path='/caisse' element={<Caisse />} />
               </Route>
        </Routes>
    </div>
