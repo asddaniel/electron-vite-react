@@ -12,6 +12,7 @@ import { NextUIProvider } from '@nextui-org/react'
 import Users from './pages/Users'
 import Login from './pages/Login'
 import Caisse from './pages/Caisse'
+import Livraison from './pages/Livraison'
 
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
                 <Route path='/users' element={<Users />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/caisse' element={<Caisse />} />
+                <Route path='/livraison' element={<Livraison />} />
               </Route>
        </Routes>
    </div>

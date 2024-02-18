@@ -92,6 +92,11 @@ export default function Facturation (){
       })
     }, [])
 
+    useEffect(() =>{
+      setFilterDate({startDate:new Date(Date.now()-86400000), endDate:new Date()})
+
+    }, [datatoAdd])
+
     const createClient = async()=>{
       if(datatoAdd.clients.name.length>0){
         //create random string for special_id

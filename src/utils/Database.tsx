@@ -224,6 +224,32 @@ export class LigneFacture extends models.Model {
     special_id = models.CharField({maxLength: 100})
  }
 
+ export class LivraisonLine extends models.Model {
+    id = models.IntegerField({primaryKey: true})
+    Livraison = models.ForeignKey({model:Livraison})
+    Produit = models.ForeignKey({model:Produit})
+    quantite = models.IntegerField()
+    CodeBarre = models.ForeignKey({model:CodeBarre})
+    is_deleted = models.BooleanField({default: false})
+    created_at = models.DateTimeField({blank:true})
+    updated_at = models.DateTimeField({blank:true})
+    deleted_at = models.DateTimeField({blank:true})
+    special_id = models.CharField({maxLength: 100})
+ }
+
+ export type livraisonLineType = {
+    id?:number;
+    Livraison?:Livraison;
+    Produit?:Produit;
+    quantite?:number;
+    CodeBarre?:CodeBarreType;
+    created_at?:Date | string;
+    updated_at?:Date | string;
+    deleted_at?:Date | string;
+    is_deleted?:boolean;
+    special_id:string;
+ }
+
 
  export class CodeBarre extends models.Model {
     id = models.IntegerField({primaryKey: true})
@@ -353,6 +379,6 @@ export class LigneFacture extends models.Model {
     version:1, 
     type: "indexedDB", 
     models: [User, Role, Categorie, Produit, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison,
-            CodeBarre, RoleUser, Reduction, Paiement]
+            CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine]
  })
  //models.migrate();

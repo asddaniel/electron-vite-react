@@ -66,12 +66,21 @@ export default function Stock (){
         approvisionnements:{special_id:"", Produit:({} as ProduitType), quantite:0, prix:0, Fournisseur:{} as FournisseurType, created_at:new Date(), updated_at:new Date(), is_deleted:false}
 
     })
+    
     const [filtercodebarres, setfiltercodebarres] = useState({
         time:{startDate:new Date(Date.now()-86400000), endDate:new Date()}, 
         Produit:null,
         Fournisseur:null,
         Approvisionnement:null 
     } satisfies FilterCodeBarreType)
+    useEffect(()=>{
+        localdata.codebarres.filter((code)=>{
+            if(code.Approvisionnement.special_id == (filtercodebarres.Approvisionnement as any)?.special_id){
+                console.log((code.created_at as Date) >filtercodebarres.time.startDate)
+                console.log((code.created_at as Date) <filtercodebarres.time.endDate)
+            } 
+        })
+    }, [filtercodebarres])
     const [dataToEdit, setDatatoEdit] = useState<localdataTypeSingle>({
         products:{} as ProduitType, 
         fournisseur:{} as FournisseurType, 
@@ -90,7 +99,7 @@ export default function Stock (){
             fournisseurs = fournisseurs.filter((four)=>four.is_deleted == false);
             approvisionnements = approvisionnements.filter((appro)=>appro.is_deleted == false);
             codebarres = codebarres.filter(c=>c.is_deleted == false);
-            // console.log(categories, products, fournisseurs, approvisionnements)
+            console.log(categories, products, fournisseurs, approvisionnements, codebarres)
            
             setlocaldata({
                 categories:categories,
@@ -112,9 +121,9 @@ export default function Stock (){
             const special_id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
            const cate = await Categorie.create({name:dataToAdd.categorie.name, 
             special_id:special_id,
-            created_at:new Date().toLocaleDateString(), 
+            created_at:new Date(), 
             id:localdata.categories.length, 
-            updated_at:new Date().toLocaleDateString(), 
+            updated_at:new Date(), 
             is_deleted:false})
            
            setlocaldata({
@@ -168,17 +177,22 @@ export default function Stock (){
         
         if(dataToAdd.products.name.length > 0){
             const special_id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-           let lenghtproduit:number|ProduitType[] = await Produit.all()
-           lenghtproduit = lenghtproduit.length
-            const prod = await Produit.create({name:dataToAdd.products.name, 
-                special_id:special_id,
-                created_at:new Date(), 
-                id:lenghtproduit,  
-                quantite:dataToAdd.products.quantite,
-                prix:dataToAdd.products.prix,
-                Categorie:dataToAdd.products.Categorie,
-                is_deleted:false
-            })
+           let lenghtproduit:ProduitType[] = await Produit.all()
+           //lenghtproduit = lenghtproduit.length
+           let dtoadd = {name:dataToAdd.products.name, 
+            
+            Categorie:dataToAdd.products.Categorie,
+            special_id:special_id,
+            created_at:new Date(), 
+            id:lenghtproduit.length+1,  
+            quantite:dataToAdd.products.quantite,
+            prix:dataToAdd.products.prix,
+            is_deleted:false
+        }
+        dtoadd = JSON.parse(JSON.stringify(dtoadd))
+        dtoadd.created_at = new Date()
+        console.log(dtoadd)
+            const prod = await Produit.create(dtoadd)
             console.log(prod)
             setlocaldata({
                 ...localdata,
@@ -313,12 +327,18 @@ export default function Stock (){
             let lengthapprovisionnement:number|ApprovisionnementType[] = await Approvisionnement.all()
             lengthapprovisionnement = lengthapprovisionnement.length
             const special_id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-            const app = await Approvisionnement.create({...dataToAdd.approvisionnements,
+           let toadd = {...dataToAdd.approvisionnements,
                 special_id:special_id,
                 created_at:new Date(), 
                 id:lengthapprovisionnement, 
+                description:dataToAdd.approvisionnements.description??"",
                 updated_at:new Date(), 
-            is_deleted:false})
+            is_deleted:false}
+            toadd = JSON.parse(JSON.stringify(toadd))
+            toadd.created_at = new Date()
+            toadd.updated_at = new Date()
+
+            const app = await Approvisionnement.create(toadd)
             console.log(dataToAdd.approvisionnements)
             Produit.filter({special_id:dataToAdd.approvisionnements.Produit.special_id}).update({quantite:Number(dataToAdd.approvisionnements.Produit.quantite) + Number(dataToAdd.approvisionnements.quantite)})
            
@@ -420,15 +440,19 @@ export default function Stock (){
                     const all = await CodeBarre.all();
                     const randomcode = generateAlphaNumericString(10);
                     const special_id = generateAlphaNumericString(20);
-                    const code = await CodeBarre.create({
-                            special_id: special_id,
-                            Approvisionnement:approvisionnement,
-                            id:all.length, 
-                            codebarre:randomcode,
-                            created_at:new Date(),
-                            Produit:approvisionnement.Produit,
-                            is_deleted:false,
-                    })
+                    let toadd = {
+                        special_id: special_id,
+                        Approvisionnement:approvisionnement,
+                        id:all.length, 
+                        codebarre:randomcode,
+                        created_at:new Date(),
+                        Produit:approvisionnement.Produit,
+                        is_deleted:false,
+                }
+                toadd = JSON.parse(JSON.stringify(toadd));
+                toadd.created_at = new Date()
+                toadd.Approvisionnement.created_at = approvisionnement.created_at;
+                    const code = await CodeBarre.create(toadd)
                     setlocaldata({
                         ...localdata,
                         codebarres:[...localdata.codebarres, code]
@@ -626,7 +650,7 @@ export default function Stock (){
                         <TableColumn>Quantité</TableColumn>
                         <TableColumn>Actions</TableColumn>
                     </TableHeader>
-      <TableBody emptyContent={"aucun produit disponible."}>{(localdata.products || []).filter((produit)=>produit?.name?.toLowerCase()?.includes(toSearch.products.produit.toLowerCase()) && produit.Categorie.name.includes(toSearch.products.categorie)).map((produit, index)=>(
+      <TableBody emptyContent={"aucun produit disponible."}>{(localdata?.products || []).filter((produit)=>produit?.name?.toLowerCase()?.includes(toSearch.products.produit.toLowerCase()) && (produit?.Categorie?.name??"").includes(toSearch.products.categorie)).map((produit, index)=>(
         <TableRow key={index}>
              <TableCell>{index+1}</TableCell>
             <TableCell>{produit.name}</TableCell>
@@ -911,6 +935,7 @@ export default function Stock (){
                     </PopoverContent>
                    </Popover>
                    <Trash2 onClick={()=>deleteApprovisionnement(app.special_id)} className="cursor-pointer"/>
+                  
                    
                     {localdata.codebarres.filter(code=>code.Approvisionnement.special_id==app.special_id).length < app.quantite ? (
                             <Tooltip showArrow={true} content="Generer code bar " color="success">
@@ -961,8 +986,12 @@ export default function Stock (){
                             </div>
                         </div>
                         <div className="py-3">
+                            
                             <Card className="p-2">
-                                <div className="font-bold text-xl"> Total {localdata.codebarres.filter(code=>code.Approvisionnement.special_id==(filtercodebarres.Approvisionnement as any)?.special_id && (code.Approvisionnement.created_at as any)>=filtercodebarres.time.startDate && (code.Approvisionnement.created_at as any)<=filtercodebarres.time.endDate).length} codes</div>
+                                <div className="font-bold text-xl"> Total {localdata.codebarres.filter((code)=>{
+                                    // console.log((code.Approvisionnement.special_id==(filtercodebarres.Approvisionnement as any)?.special_id))
+                                    // console.log((code.Approvisionnement.created_at as any)>=filtercodebarres.time.startDate, code.Approvisionnement.created_at)
+                                    return ((code.Approvisionnement.special_id==(filtercodebarres.Approvisionnement as any)?.special_id) && ((code.Approvisionnement.created_at as any)>=filtercodebarres.time.startDate) && ((code.Approvisionnement.created_at as any)<=filtercodebarres.time.endDate))}).length} codes</div>
                             </Card>
                         </div>
                         <div className="py-4">
