@@ -19,6 +19,12 @@ export default defineConfig(({ command }) => {
         '@': path.join(__dirname, 'src')
       },
     },
+    rollupOptions: {
+      exclude: [
+        'node_modules/beast-orm**/*', // Exclure tous les fichiers et dossiers dans node_modules
+        
+      ]
+    },
     plugins: [
       react(),
       electron({

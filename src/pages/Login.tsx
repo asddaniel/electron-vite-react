@@ -4,9 +4,12 @@ import { useNavigate } from "react-router-dom"
 import {User, Usertype} from "@/utils/Database"
 import { useEffect, useState } from "react"
 import Swal from "sweetalert2"
-export default function Login(){
+import { initializeDefaultUser } from "@/utils/Facade"
+import { useAuth } from "@/utils/Store"
+export default function Login( {actualiser}:{actualiser:()=>void}) {
    const [users, setusers] = useState<Usertype[]>([])
    const route = useNavigate()
+   const {setAuth}:any = useAuth()
    const [datalogin, setdatalogin] = useState({
        email:"",
        password:""
@@ -16,6 +19,7 @@ export default function Login(){
         res = res.filter(r=>r.is_deleted == false);
         setusers(res)
        })
+       initializeDefaultUser();
    }, [])
    const connexion = async ()=>{
             if(datalogin.email.length > 0 && datalogin.password.length > 0){
@@ -24,6 +28,8 @@ export default function Login(){
                     const is_valid = await bcrypt.compare(datalogin.password, user.password)
                     if(is_valid){
                         localStorage.setItem("user", JSON.stringify(user))
+                        setAuth({isLogged:true, user:user})
+                        actualiser()
                         Swal.fire({
                             title:"Réussi", 
                             text: "Connexion réussi avec succès", 

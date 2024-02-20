@@ -1,6 +1,32 @@
+import { User } from "./Database";
+import bcrypt from "bcryptjs"
+
+export const initializeDefaultUser = async ()=>{
+ const all = await User.all();
+ if(all.length == 0){
+
+  const salt = await bcrypt.genSalt(9)
+  const hash = await bcrypt.hash("admin", salt)
+  const user = await User.create({
+    username:"admin", 
+    id:all.length,
+    email:"admin", 
+    password:hash, 
+    telephone:"0000",
+    role:0,
+    created_at:new Date(),
+    is_deleted:false,
+    special_id:generateAlphaNumericString(20),
+  })
+   
+ }
+ 
+}
+
+
 export const getPageStyle = ()=>{
     // Récupérer toutes les feuilles de style liées au document
-  const styleSheets = document.styleSheets;
+  const styleSheets:any = document.styleSheets;
   
   // Stocker les styles sous forme de chaîne de caractères
   let allStyles = '';

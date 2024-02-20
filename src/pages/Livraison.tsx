@@ -6,6 +6,8 @@ import { useEffect, useState } from "react"
 import { Modal, ModalHeader, ModalBody, ModalContent, Input, Card } from "@nextui-org/react"
 import { generateAlphaNumericString } from "@/utils/Facade"
 import Swal from "sweetalert2"
+import { useAuth } from "@/utils/Store"
+import { useNavigate } from "react-router-dom"
 
 interface LocalDatatype  {
     livraisons: LivraisonType[]
@@ -34,7 +36,7 @@ type toAddLineType = {
     code:CodeBarreType|null;
 }
 
-export default function Livraison(){
+export  function Livraison(){
     const [modalLivraison, setmodalLivraison] = useState(false)
     const [modallivraisonListe, setmodalLivraisonListe] = useState(false) //
     const [datasearch, setdatasearch] = useState({
@@ -82,7 +84,13 @@ export default function Livraison(){
         lignes:[],
         codebarres:[],
     })
+    const {auth} : any = useAuth()
+    const route = useNavigate()
     useEffect(()=>{
+       
+            if(![0, 1, 2].includes(Number(auth.user.role))){
+              route("/login")
+          }
         Promise.all([Livr.all(), LivraisonLine.all(), Facture.all(), Produit.all(), CodeBarre.all()])
         .then(([livraisons, lines, factures, produits, codes])=>{
             livraisons = livraisons.filter(l=>l.is_deleted==false);

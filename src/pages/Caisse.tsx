@@ -9,6 +9,8 @@ import Swal from "sweetalert2"
 import { FilePenIcon, Trash2 } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react"
 import Datepicker from "react-tailwindcss-datepicker"
+import { useAuth } from "@/utils/Store"
+import { useNavigate } from "react-router-dom"
 type localdataType = {
     factures: FactureType[],
     paiements: PaiementType[],
@@ -24,10 +26,12 @@ type toAddType = {
 export default function Caisse () {
 
     const [openModal, setOpenModal] = useState(false)
+    const route = useNavigate()
     const [data, setdata] = useState<localdataType>({
         factures:[], 
         paiements:[],
     })
+    const {auth} :any = useAuth()
     const [filterDate, setFilterDate] = useState({startDate:new Date(Date.now()-86400000), endDate:new Date()})
     const [searchfactures, setsearchfactures] = useState("")
     const [dataToAdd, setDatatoAdd] = useState<toAddType>({
@@ -37,6 +41,9 @@ export default function Caisse () {
         taux:2800
     })
     useEffect(()=>{
+        if(![0, 1, 5].includes(Number(auth.user.role))){
+            route("/")
+        }
             Promise.all([Paiement.all(), Facture.all()])
             .then(([listpaiements, listfactures])=>{
                 listpaiements = listpaiements.filter((lr:any)=>lr.is_deleted==false);

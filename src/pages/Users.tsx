@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs"
 import { FilePenLine, Trash2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import Swal from "sweetalert2"
-import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react"
+import { Popover, PopoverContent, PopoverTrigger, Select, SelectItem } from "@nextui-org/react"
 // const bcrypt = require("bcryptjs")
 
 export default function Users (){
@@ -16,7 +16,8 @@ export default function Users (){
         password:"", 
         confirmpassword:"", 
         telephone:"", 
-        is_deleted:"false"
+        is_deleted:"false", 
+        role:7,
     } as any);
     useEffect(()=>{
             User.all().then((users:Usertype[])=>{
@@ -56,6 +57,7 @@ export default function Users (){
             email:datatoAdd.email, 
             telephone:datatoAdd.telephone, 
             password:hash, 
+            role:datatoAdd.role,
             created_at:new Date(), 
             updated_at:new Date(),
             is_deleted:false, 
@@ -82,14 +84,16 @@ export default function Users (){
 
 
     const updateUser = async(special_id:string)=>{
-        if(datatoAdd.password.length > 0){
+        if(datatoAdd.password.trim().length > 0){
             const salt = await bcrypt.genSalt(9)
             const hash = await bcrypt.hash(datatoAdd.password, salt)
             User.filter({special_id:special_id}).update({
                 ...datatoAdd,
                 password:hash
             })
+            console.log("pass modified successfully")
         }else{
+            console.log(datatoAdd)
             User.filter({special_id:special_id}).update({
                 ...datatoAdd
             })
@@ -108,6 +112,7 @@ export default function Users (){
         email:"", 
         password:"", 
         confirmpassword:"", 
+        role:7,
         telephone:"", 
         is_deleted:"false" 
         })
@@ -152,6 +157,17 @@ export default function Users (){
                         </div>
                         <div className="py-2">
                             <Input label="telephone" value={datatoAdd.telephone} onInput={(e:any)=>setdatatoAdd({...datatoAdd, telephone:e.target.value})} />
+                        </div>
+                        <div className="py-2">
+                            <Select label="Role" value={datatoAdd.role} onInput={(e:any)=>setdatatoAdd({...datatoAdd, role:e.target.value})} className="w-full">
+                                    <SelectItem key={0}  value={0}>Admin</SelectItem>
+                                    <SelectItem key={1}  value={1}>Vendeur</SelectItem>
+                                    <SelectItem key={2}  value={2}>livreur</SelectItem>
+                                    <SelectItem key={3}  value={3}>Facturier</SelectItem>
+                                    <SelectItem key={4}  value={4}>Fournisseur</SelectItem>
+                                    <SelectItem key={5}  value={5}>Caissier</SelectItem>
+                                    <SelectItem key={6}  value={6}>Gestionnaire</SelectItem>
+                            </Select>
                         </div>
                         <div className="py-2">
                             <Input type="password" label="mot de passe" value={datatoAdd.password} onInput={(e:any)=>setdatatoAdd({...datatoAdd, password:e.target.value})} />
@@ -212,6 +228,18 @@ export default function Users (){
                         </div>
                         <div className="py-2">
                             <Input label="telephone" value={datatoAdd.telephone} onInput={(e:any)=>setdatatoAdd({...datatoAdd, telephone:e.target.value})} />
+                        </div>
+                        <div className="py-2">
+                            <Select label="Role"  selectedKeys={[datatoAdd.role]}  value={datatoAdd.role} onChange={(e:any)=>setdatatoAdd({...datatoAdd, role:e.target.value})} className="w-full">
+                                    <SelectItem key={0}   value={0}>Admin</SelectItem>
+                                    <SelectItem key={1}  value={1}>Vendeur</SelectItem>
+                                    <SelectItem key={2}  value={2}>livreur</SelectItem>
+                                    <SelectItem key={3}  value={3}>Facturier</SelectItem>
+                                    <SelectItem key={4}  value={4}>Fournisseur</SelectItem>
+                                    <SelectItem key={5}  value={5}>Caissier</SelectItem>
+                                    <SelectItem key={6}  value={6}>Gestionnaire</SelectItem>
+                                    <SelectItem key={7}  value={7}>invité</SelectItem>
+                            </Select>
                         </div>
                         <div className="py-2">
                             <Input type="password" label="mot de passe" value={datatoAdd.password} onInput={(e:any)=>setdatatoAdd({...datatoAdd, password:e.target.value})} />

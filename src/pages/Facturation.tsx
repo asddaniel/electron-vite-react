@@ -9,6 +9,7 @@ import { getPageStyle } from "@/utils/Facade";
 import { useReactToPrint } from "react-to-print";
 import logo from "@/assets/logomtech.png"
 import Datepicker from "react-tailwindcss-datepicker"; 
+import { useAuth } from "@/utils/Store";
 interface dataType {
     clients: ClientType[];
     factures: FactureType[];
@@ -79,7 +80,11 @@ export default function Facturation (){
     } as any, ligneFacture:{}})
 
     const route = useNavigate()
+    const {auth}:any = useAuth();
     useEffect(()=>{
+      if(![0, 1, 3].includes(Number(auth.user.role))){
+        route("/login")
+    }
       Promise.all([Facture.all(), Client.all(), Produit.all()])
       .then(([factures, clients, products])=>{
         console.log(clients)

@@ -17,3 +17,10 @@ export const useLayoutWidth = create((set) => ({
   setLayoutWidth: (value:LayouSetType) => set({ sidebar: value.sidebar, page: value.page}),
  
 }))
+export const useAuth = create((set)=>({
+    auth:{
+      isLogged:JSON.parse(localStorage.getItem("user") || "false")?true:false,
+      user:JSON.parse(localStorage.getItem("user") || "{}"),
+    },
+    setAuth:(value:{isLogged:boolean, user:any})=>set({auth:{isLogged:value.isLogged, user:value.user}}),
+}))

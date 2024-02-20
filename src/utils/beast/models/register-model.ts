@@ -127,7 +127,12 @@ export class registerModel {
       }
 
       ModelMigrations.prepare(databaseSchema.databaseName)
-      transactionOnCommit.prepare(modelClassRepresentations as any)
+      try {
+        transactionOnCommit.prepare(modelClassRepresentations as any)
+      } catch (error) {
+        console.log(error)
+      }
+      // transactionOnCommit.prepare(modelClassRepresentations as any)
     }
 
 
@@ -313,7 +318,7 @@ export class ModelEditor {
 
   static addMethodForeignKey(foreignKeyField:ForeignKey, FieldName:string, modelName:string, databaseSchema:DatabaseSchema) {
     
-    const foreignKeyFieldModel: Model = foreignKeyField.model
+    const foreignKeyFieldModel: any = foreignKeyField.model
     const currentModel: Model = models[modelName]
     const FunctionName = uncapitalize(modelName)
 
@@ -328,6 +333,8 @@ export class ModelEditor {
 
     }
 
+    //console.log(typeof foreignKeyFieldModel)
+    try {
     foreignKeyFieldModel['prototype'][FunctionName+'_setAdd'] = async function (arg) {
       const reporter = this
       arg[FieldName] = reporter
@@ -343,6 +350,10 @@ export class ModelEditor {
       obj[TableSchema.id.keyPath] = this[FieldName] 
       return foreignKeyFieldModel.filter(obj).execute()
     }
+  }
+  catch (err){
+    console.log(err)
+  }
 
 
   }

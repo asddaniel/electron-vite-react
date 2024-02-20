@@ -4,10 +4,14 @@ import { Table, TableBody, TableHeader, TableColumn, TableCell, Button, ModalHea
 import { FilePenLine, Trash2, BarcodeIcon } from "lucide-react"
 import Swal from "sweetalert2"
 import { Modal, ModalContent } from "@nextui-org/react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import { useReactToPrint } from "react-to-print";
+import useKeyboardShortcut from "use-keyboard-shortcut";
+import { getPageStyle } from "@/utils/Facade"
 import { RadioGroup, Radio } from "@nextui-org/react"
 import { Produit, ProduitType, Fournisseur, FournisseurType,  Approvisionnement, ApprovisionnementType, Categorie,
      CategorieType,  CodeBarreType } from "@/utils/Database"
+     import { useAuth } from "@/utils/Store"
 // import { models } from "@/utils/beast"
 // import { db } from "@/utils/Database"
 import { User, Role,  Client, Facture, LigneFacture, Livraison,
@@ -16,6 +20,7 @@ import { User, Role,  Client, Facture, LigneFacture, Livraison,
     import { generateAlphaNumericString } from "@/utils/Facade"
     import { Spinner } from "@nextui-org/react"
     import BwipJs from "bwip-js"
+    import { useNavigate } from "react-router-dom"
 
 interface localdataType {
     categories: CategorieType[],
@@ -35,7 +40,7 @@ const toSvg = (code:string)=>{
         bcid:        'code128',       // Barcode type
         text:        code,    // Text to encode
         height:      12,              // Bar height, in millimeters
-        includetext: true,            // Show human-readable text
+        includetext: false,            // Show human-readable text
         textxalign:  'center',        // Always good to set this
         textcolor:   'ff0000',        // Red text
     });
@@ -54,7 +59,10 @@ export default function Stock (){
     const [modalProduct, setModalProduct] = useState(false);
     const [modalFournisseur, setModalFournisseur] = useState(false);
     const [modalApprovisionnement, setModalApprovisionnement] = useState(false);
+    const route = useNavigate();
     const [modalCategorie, setModalCategorie] = useState(false);
+    const {auth} :any= useAuth()
+    const printer = useRef(null)
     const [filterDate, setFilterDate] = useState({startDate:new Date(Date.now()-86400000), endDate:new Date()})
     const [toSearch, setTosearch] = useState({categories:"", products:{produit:"", categorie:""}, fournisseurs:"", approvisionnements:""})
     const [localdata, setlocaldata] = useState<localdataType>({categories:[], products:[],
@@ -66,6 +74,31 @@ export default function Stock (){
         approvisionnements:{special_id:"", Produit:({} as ProduitType), quantite:0, prix:0, Fournisseur:{} as FournisseurType, created_at:new Date(), updated_at:new Date(), is_deleted:false}
 
     })
+    const { flushHeldKeys } = useKeyboardShortcut(
+        ["Control", "P"],
+        shortcutKeys => {console.log("Shift + H has been pressed.");
+      imprimer()},
+        { 
+          overrideSystem: false,
+          ignoreInputFields: false, 
+          repeatOnHold: false 
+        }
+      );
+      const imprimer = async ()=>{
+        document.querySelector(".barcode-code")?.classList.remove("hidden")
+        const all = document.querySelectorAll(".no-print");
+        all.forEach((e)=>e.classList.add("hidden"))
+        await handlePrint();
+        document.querySelector(".barcode-code")?.classList.add("hidden")
+        all.forEach((e)=>e.classList.remove("hidden"))
+      }
+  
+      const handlePrint = useReactToPrint({
+        content: () => printer.current,
+        documentTitle: 'codebarre',
+        copyStyles:true, 
+        pageStyle: () => getPageStyle(),
+      });
     
     const [filtercodebarres, setfiltercodebarres] = useState({
         time:{startDate:new Date(Date.now()-86400000), endDate:new Date()}, 
@@ -90,6 +123,10 @@ export default function Stock (){
     })
     const [isloading, setisloading] = useState(false);
     useEffect(()=>{
+        if(![0, 6].includes(Number(auth.user.role))){
+            console.log(auth.user.role)
+            route("/login")
+        }
         
         //  console.log(models)
         Promise.all([Categorie.all(), Produit.all(), Fournisseur.all(), Approvisionnement.all(), CodeBarre.all(),])
@@ -125,7 +162,7 @@ export default function Stock (){
             id:localdata.categories.length, 
             updated_at:new Date(), 
             is_deleted:false})
-           
+        //    console.log("added")
            setlocaldata({
                ...localdata,
                categories:[...localdata.categories, cate]
@@ -985,7 +1022,7 @@ export default function Stock (){
 
                             </div>
                         </div>
-                        <div className="py-3">
+                        <div className="py-3 grid grid-cols-3 gap-3">
                             
                             <Card className="p-2">
                                 <div className="font-bold text-xl"> Total {localdata.codebarres.filter((code)=>{
@@ -993,6 +1030,19 @@ export default function Stock (){
                                     // console.log((code.Approvisionnement.created_at as any)>=filtercodebarres.time.startDate, code.Approvisionnement.created_at)
                                     return ((code.Approvisionnement.special_id==(filtercodebarres.Approvisionnement as any)?.special_id) && ((code.Approvisionnement.created_at as any)>=filtercodebarres.time.startDate) && ((code.Approvisionnement.created_at as any)<=filtercodebarres.time.endDate))}).length} codes</div>
                             </Card>
+                            <Card className="p-2 col-span-2 flex justify-center items-center">
+                                <button onClick={()=>imprimer()} className="rounded shadow w-64 font-bold text-white bg-gray-900 p-2">imprimer le code</button>
+                            </Card>
+                        </div>
+                        <div className="py-3 barcode-code hidden" ref={printer}>
+                            <div className="grid grid-cols-3 gap-2 p-2">
+                            {localdata.codebarres.filter(code=>code.Approvisionnement.special_id==(filtercodebarres.Approvisionnement as any)?.special_id && (code.Approvisionnement.created_at as any)>=filtercodebarres.time.startDate && (code.Approvisionnement.created_at as any)<=filtercodebarres.time.endDate).map((code, index)=>(
+                                <Card className="p-3 h-32 flex ">
+                                 <div dangerouslySetInnerHTML={{__html:toSvg(code.codebarre)}}></div>
+                                </Card>
+                            ))}                                
+                            </div>
+                           
                         </div>
                         <div className="py-4">
                             <Table aria-label="liste des code barres des produits">

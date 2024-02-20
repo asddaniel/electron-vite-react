@@ -2,10 +2,11 @@ import { Card } from "@nextui-org/react"
 import { ReceiptIcon, DollarSignIcon, BaggageClaimIcon, UsersIcon, ShoppingCartIcon, BookIcon } from "lucide-react"
 import { Link } from "react-router-dom"
 export default function Home(){
-    return (<div className="w-full bg-inherit font-inherit">
-        <h1>Home</h1>
+    return (<div className="w-full bg-inherit font-inherit py-5">
+        <h1 className="font-bold text-3xl">Home</h1>
+       
     
-    <div className="border p-3">
+    <div className="border p-3 rounded-lg">
         <div className="grid lg:grid-cols-4 md:grid-col-3 sm:grid-col-2 grid-col-1 gap-2">
 
         <Link to={"/facturation"} >

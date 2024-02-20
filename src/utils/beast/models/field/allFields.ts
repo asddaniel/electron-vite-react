@@ -10,11 +10,11 @@ export class AutoField extends field{
 
 	fieldName: FieldKeys = 'AutoField'
 	unique = true
-	autoIncrement = true
-	primaryKey?: boolean
+	autoIncrement = true;
+	declare primaryKey?: boolean
 	type= FieldType.BIGINT
 	blank = true
-	default?: any
+	declare default?: any
 
 	constructor(data?: AutoFieldParams) {
 		super()
@@ -38,10 +38,10 @@ export class AutoField extends field{
 export class BigIntegerField extends field{
 
 	fieldName: FieldKeys = 'BigIntegerField'
-	unique?: boolean
-	primaryKey?: boolean
-	blank?: boolean
-	default?: any
+	declare unique?: boolean
+	declare primaryKey?: boolean
+	declare blank?: boolean
+	declare default?: any
 	type = FieldType.BIGINT
 	
 	constructor(data?:BigIntegerFieldParams) {
@@ -67,9 +67,9 @@ export class BigIntegerField extends field{
 export class BooleanField extends field{
 
 	fieldName: FieldKeys = 'BooleanField'
-	unique?: boolean
-	blank?: boolean
-	default?: any
+	declare unique?: boolean
+	declare blank?: boolean
+	declare default?: any
 
 	constructor(data?: BooleanFieldParams) {
 		super()
@@ -92,13 +92,13 @@ export class BooleanField extends field{
 export class CharField extends field{
 
 	fieldName: FieldKeys = 'CharField'
-	maxLength?:number | undefined
-	minLength?:number | undefined
-	choices?: any[] | undefined
-	primaryKey?: boolean
-	blank?: boolean
-	default?: any
-	unique?: boolean
+	declare maxLength?:number | undefined
+	declare minLength?:number | undefined
+	declare choices?: any[] | undefined
+	declare primaryKey?: boolean
+	declare blank?: boolean
+	declare default?: any
+	declare unique?: boolean
 
 	type = FieldType.DATE
 	
@@ -129,8 +129,8 @@ export class DateField extends field{
 
 	fieldName: FieldKeys = 'DateField'
 	type = FieldType.DATE
-	blank?: boolean
-	default?: any
+	declare blank?: boolean
+	declare default?: any
 	
 	constructor(data?:DateFieldParams) {
 		super()
@@ -155,8 +155,8 @@ export class DateTimeField  extends field{
 
 	fieldName: FieldKeys = 'DateTimeField'
 	type = FieldType.DATE
-	blank?: boolean
-	default?: any
+	declare blank?: boolean
+	declare default?: any
 	
 	constructor(data?:DateTimeFieldParams) {
 		super()
@@ -181,10 +181,10 @@ export class indexedDBArrayField extends field {
 
 	fieldName: FieldKeys = 'indexedDBArrayField'
 	type = FieldType.ARRAY
-	blank?: boolean
-	default?: any
-	maxLength?: number
-	minLength?: number
+	declare blank?: boolean
+	declare default?: any
+	declare maxLength?: number
+	declare minLength?: number
 	size?: number
 	private _field?: any
 
@@ -233,8 +233,8 @@ export class indexedDBJsonField extends field {
 
 	fieldName: FieldKeys = 'indexedDBJsonField'
 	type = FieldType.JSON
-	blank?: boolean
-	default?: any
+	declare blank?: boolean
+	declare default?: any
 	null?: boolean
 	
 	constructor(data?:IndexedDBJsonFieldParams) {
@@ -260,13 +260,13 @@ export class indexedDBJsonField extends field {
 export class TextField  extends field{
 
 	fieldName: FieldKeys = 'TextField'
-	maxLength?:number | undefined
-	minLength?:number | undefined
-	primaryKey?: boolean
-	blank?: boolean
-	default?: any
+	declare maxLength?:number | undefined
+	declare minLength?:number | undefined
+	declare primaryKey?: boolean
+	declare blank?: boolean
+	declare default?: any
 
-	type: FieldType.TEXT
+	declare type: FieldType.TEXT
 	
 	constructor(data?:TextFieldParams) {
 		super()
@@ -293,11 +293,11 @@ export class TextField  extends field{
 export class IntegerField extends field {
 	
 	fieldName: FieldKeys = 'IntegerField'
-	unique?: boolean
-	primaryKey?: boolean
+	declare unique?: boolean
+	declare primaryKey?: boolean
 	type = FieldType.INT
-	blank?: boolean
-	default?: any
+	declare blank?: boolean
+	declare default?: any
 	
 	constructor(data?:IntegerFieldParams) {
 		super()
@@ -323,10 +323,10 @@ export class IntegerField extends field {
 export class ForeignKey extends field {
 	
 	fieldName: FieldKeys = 'ForeignKey'
-	model
+	// declare model
 	foreignKey = true
-	blank?: boolean
-	default?: any
+	declare blank?: boolean
+	declare default?: any
 	
 
 	constructor(data?: ForeignKeyParams) {
@@ -344,9 +344,9 @@ export class OneToOneField extends field {
 	
 	fieldName: FieldKeys = 'ManyToManyField'
 	foreignKey = true
-	model
-	blank?: boolean
-	default?: any
+	declare model
+	declare blank?: boolean
+	declare default?: any
 	onDelete?: any
 
 	constructor(data?: OneToOneFieldParams) {
@@ -367,12 +367,12 @@ export class OneToOneField extends field {
 export class ManyToManyField extends field {
 
 	fieldName: FieldKeys = 'ManyToManyField'
-	model
+	declare model
 	foreignKey = true
-	blank?: boolean
-	default?: any
+	declare blank?: boolean
+	declare default?: any
 	onDelete?: any
-	unique?: boolean
+	declare unique?: boolean
 
 
 	constructor(data?:ManyToManyFieldParams) {

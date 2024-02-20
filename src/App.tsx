@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import UpdateElectron from '@/components/update'
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import { Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from 'react-router-dom'
 import './App.css'
 import Sidebar from './layouts/Sidebar'
 import Home from './pages/Home'
@@ -12,11 +12,42 @@ import { NextUIProvider } from '@nextui-org/react'
 import Users from './pages/Users'
 import Login from './pages/Login'
 import Caisse from './pages/Caisse'
-import Livraison from './pages/Livraison'
+import {Livraison as Livra} from './pages/Livraison'
+import { models } from '@/utils/beast'
+import Rapport from './pages/Rapport'
+import { useAuth } from './utils/Store'
+
+import { Produit, Categorie, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison , CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine, User, Role } from './utils/Database'
+
+models.register({
+  databaseName:"mtech", 
+  version:1, 
+  type: "indexedDB", 
+  models: [User, Role, Categorie, Produit, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison,
+          CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine]
+})
 
 
+const isproductionroute = /^\/[A-Z]:\//;
 function App() {
   const {page, sidebar} = useLayoutWidth() as LayouType
+   const {auth, setAuth}:any = useAuth()
+   const [reloadstate, setreloadstate] = useState(false)
+//  const [AuthState, setAuthState] = useState({
+//   user:{}, 
+//   isAuthenticated: false
+//  })
+const actualiser = ()=>{
+  setreloadstate(!reloadstate)
+}
+ useEffect(()=>{
+   const user = localStorage.getItem("user")
+   if(user){
+     setAuth({isLogged:true, user:JSON.parse(user)})
+     console.log(auth, user)
+   }
+   
+ }, [reloadstate])
   
   return (
     <NextUIProvider>
@@ -31,8 +62,28 @@ function App() {
     
           <Routes>
        
-      
-              <Route>
+      {isproductionroute.test(location.pathname)?(
+        <Route >
+        <Route path='/C:/' element={auth.isLogged ? <Home />: <Login actualiser={actualiser} />} />
+        <Route path='/C:/stock' element={auth.isLogged ? <Stock />: <Login actualiser={actualiser} />} />
+        <Route path='/C:/rapport' element={auth.isLogged ? <Rapport />: <Login actualiser={actualiser} />} />
+        <Route path='/C:/facturation' element={auth.isLogged ? <Facturation />: <Login actualiser={actualiser} />} />
+        <Route path='/C:/users' element={auth.isLogged ? <Users />: <Login actualiser={actualiser} />} />
+        <Route path='/C:/login' element={<Login actualiser={actualiser} />} />
+        <Route path='/C:/caisse' element={auth.isLogged ? <Caisse />: <Login actualiser={actualiser} />} />
+        <Route path='/C:/livraison' element={auth.isLogged ? <Livra/>: <Login actualiser={actualiser} />} />
+      </Route>
+      ):(<Route>
+        <Route path='/' element={auth.isLogged ? <Home /> : <Login actualiser={actualiser} />} />
+        <Route path='/stock' element={auth.isLogged ? <Stock />: <Login actualiser={actualiser} />} />
+        <Route path='/rapport' element={auth.isLogged ? <Rapport />: <Login actualiser={actualiser} />} />
+        <Route path='/facturation' element={auth.isLogged? <Facturation />: <Login actualiser={actualiser} />} />
+        <Route path='/users' element={auth.isLogged ? <Users />: <Login actualiser={actualiser} />} />
+        <Route path='/login' element={<Login actualiser={actualiser} />} />
+        <Route path='/caisse' element={auth.isLogged ? <Caisse />: <Login actualiser={actualiser} />} />
+        <Route path='/livraison' element={auth.isLogged ? <Livra />: <Login actualiser={actualiser} />} />
+      </Route>)}
+              {/* <Route>
                 <Route path='/' element={<Home />} />
                 <Route path='/stock' element={<Stock />} />
                 <Route path='/facturation' element={<Facturation />} />
@@ -40,7 +91,7 @@ function App() {
                 <Route path='/login' element={<Login />} />
                 <Route path='/caisse' element={<Caisse />} />
                 <Route path='/livraison' element={<Livraison />} />
-              </Route>
+              </Route> */}
        </Routes>
    </div>
      

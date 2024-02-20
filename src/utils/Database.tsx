@@ -12,6 +12,7 @@ export class User extends models.Model{
   username = models.CharField({maxLength: 100})
   email = models.CharField({blank: true, maxLength: 100})
   password = models.CharField({maxLength: 100})
+  role = models.IntegerField();
   telephone = models.CharField({maxLength: 100})
   is_deleted = models.BooleanField({default: false})
   created_at = models.DateTimeField({blank:true})
