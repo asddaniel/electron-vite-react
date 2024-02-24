@@ -1,6 +1,6 @@
 
 import { Card } from "@nextui-org/react"
-import { HomeIcon, ReceiptIcon, ShoppingCartIcon, DollarSignIcon,
+import { HomeIcon, ReceiptIcon, ShoppingCartIcon, DollarSignIcon, HandCoinsIcon,
      LogOutIcon, BookIcon, UsersIcon, BaggageClaimIcon, MenuIcon, XCircleIcon } from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
@@ -29,7 +29,7 @@ export default function Sidebar() {
     }
     return (<>
             <div className={" h-screen py-6 fixed transition-all duration-300 w-16  "+(sidebar=="full"?"lg:w-64":"lg:w-16")}>
-        <Card className="lg:h-5/6 h-full p-3 bg-slate-800 shadow-lg">
+        <Card className=" h-full p-3 bg-slate-800 shadow-lg overflow-y-auto">
         
         <motion.div layout className="flex justify-end px-3">
         {openMenu? <MenuIcon onClick={()=>updateLayout(true)} className="hover:scale-110 cursor-pointer font-bold transition-all duration-300 text-white "/>:<XCircleIcon onClick={()=>updateLayout(false)} className="hover:scale-110 cursor-pointer font-bold transition-all duration-300 text-white "/>}
@@ -77,6 +77,13 @@ export default function Sidebar() {
                 <div className={"hover:bg-gray-900 transition-all duration-300 py-1 text-white rounded shadow p-2 flex justify-start gap-2 items-center "+(activetab==5?"bg-gray-950":"")} onClick={()=>setactivetab(5)}>
                     <BookIcon  />
                    {sidebar=="full" && <button className="hidden lg:block bg-transparent text-inherit text-start text-2xl font-light rounded-xl outline-none border-none   "> Rapport </button>}
+                </div>
+               
+            </Link>
+            <Link to={"/depense"} className="flex flex-col justify-evenly pt-6">
+                <div className={"hover:bg-gray-900 transition-all duration-300 py-1 text-white rounded shadow p-2 flex justify-start gap-2 items-center "+(activetab==6?"bg-gray-950":"")} onClick={()=>setactivetab(6)}>
+                    <HandCoinsIcon  />
+                   {sidebar=="full" && <button className="hidden lg:block bg-transparent text-inherit text-start text-2xl font-light rounded-xl outline-none border-none   "> Depenses </button>}
                 </div>
                
             </Link>

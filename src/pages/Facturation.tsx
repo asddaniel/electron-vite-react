@@ -1,5 +1,5 @@
 import { Client, ClientType, Facture, FactureType, LigneFacture, LigneFactureType, Produit, ProduitType } from "@/utils/Database";
-import { Button, Card, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Popover, PopoverContent, PopoverTrigger, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs } from "@nextui-org/react";
+import { Button, Card, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Popover, PopoverContent, PopoverTrigger, Tab, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tabs, Tooltip } from "@nextui-org/react";
 import { EyeIcon, FilePenIcon, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -261,7 +261,7 @@ export default function Facturation (){
       }
       const all = await Facture.all();
       const special_id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        const facture = await Facture.create({
+        let facture = await Facture.create({
           special_id:special_id, 
           created_at:new Date(),
           updated_at:new Date(),
@@ -273,7 +273,9 @@ export default function Facturation (){
           is_paid:false,
           numfacture:new Date().toLocaleDateString().toString()+Math.random().toString(36).substring(2, 15),
         })
-        setdata({
+       await Facture.filter({special_id:special_id}).update({Client:datatoAdd.factures.Client})
+       facture = {...facture, Client:datatoAdd.factures.Client}
+       setdata({
           ...data, 
           factures:[...data.factures, facture]
         })
@@ -295,13 +297,23 @@ export default function Facturation (){
           icon:"success",
         })
     }
+    const updateProductQuantiteByLigne = async(product:ProduitType, quantite:number, ligne:LigneFactureType)=>{
+      const oldline = await LigneFacture.get({special_id:ligne.special_id});
+      const oldproduct = await Produit.get({special_id:product.special_id})
+      await Produit.filter({special_id:product.special_id}).update({quantite:oldproduct.quantite+Number(oldline.quantite)-Number(quantite)});
+      setdata({
+        ...data,
+        produits:data.produits.map(p=>{
+          if(p.special_id==product.special_id){return {...p, quantite:oldproduct.quantite+Number(oldline.quantite)-Number(quantite)}}else{return p}})
+       
+      })
+    }
 
     const updateLigne = async(dataLigne:LigneFactureType)=>{
+     
       await LigneFacture.filter({special_id:dataLigne.special_id}).update(dataLigne);
-      // setdataFacture({
-      //   ...dataFacture, 
-      //   Lignes: dataFacture.Lignes.filter(l=>l.special_id!=dataLigne.special_id)
-      // })
+      
+      
 
     }
     const deleteFacture = (special_id:string)=>{
@@ -348,7 +360,14 @@ export default function Facturation (){
 
         const all = await LigneFacture.all();
         const special_id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
+        if(dataFacture.toAdd?.Produit?.quantite<dataFacture.toAdd?.quantite){
+          Swal.fire({
+            title:"Oops..",
+            text:"Quantité insuffisante dans le stock",
+            icon:"error",
+          })
+          return
+        }
         const lignes =   await LigneFacture.create({
           Produit:dataFacture.toAdd?.Produit,
           quantite:dataFacture.toAdd?.quantite,
@@ -359,6 +378,17 @@ export default function Facturation (){
           created_at:new Date(),
           updated_at:new Date(),
         });
+        await Produit.filter({special_id:dataFacture.toAdd?.Produit?.special_id}).update({quantite:Number(dataFacture.toAdd?.Produit?.quantite)-Number(dataFacture.toAdd?.quantite)})
+        setdata({
+          ...data,
+          produits:data.produits.map(p=>{
+            if(p.special_id==dataFacture.toAdd.Produit.special_id){
+              return {...p, quantite:Number(dataFacture.toAdd.Produit.quantite)-Number(dataFacture.toAdd.quantite)}
+            }else{
+              return p
+            }
+          })
+        })
         setdataFacture({
           ...dataFacture, 
           Lignes:[...dataFacture.Lignes, lignes],
@@ -367,18 +397,26 @@ export default function Facturation (){
            
           }
         })
-        // Swal.fire({
-        //   title:"ajouté",
-        //   text:"Ligne ajoutée avec succès.",
-        //   icon:"success",
-        // })
+        
       
        
         }
     }
 
-    const deleteLigne = (ligne:LigneFactureType)=>{
+    const deleteLigne = async (ligne:LigneFactureType)=>{
           LigneFacture.filter({special_id:ligne.special_id}).update({is_deleted:true, deleted_at:new Date()})
+          setdata({
+            ...data,
+            produits:data.produits.map(p=>{
+              if(p.special_id==ligne.Produit.special_id){
+                return {...p, quantite:Number(p.quantite)+Number(ligne.quantite)}
+              }else{
+                return p
+              }
+            })
+          })
+          await Produit.filter({special_id:ligne.Produit.special_id}).update({quantite:Number(ligne.Produit.quantite)+Number(ligne.quantite)})
+
     }
     const imprimer = async ()=>{
       document.querySelector(".header-printer")?.classList.remove("hidden")
@@ -403,15 +441,20 @@ export default function Facturation (){
             <ModalBody>
               <div className="py-3 px-2">
                 <div className="py-3 px-2">
+                  <div className="py-3">
+                    {dataFacture?.toAdd?.Produit && <Card className="p-2">Quantité disponible: {dataFacture.toAdd.Produit?.quantite} </Card>}
+                  </div>
                   <Card className="p-2 grid grid-cols-5 gap-2">
                     <div className="col-span-3">
                       <Input label="produit" value={dataFacture.suggestion} onChange={(e)=>setdataFacture({...dataFacture, suggestion:e.target.value})}  />
                     </div>
                     <div className="">
-                      <Input type="number" label="quantité" value={dataFacture?.toAdd?.quantite??"" as any} onChange={(e)=>setdataFacture({...dataFacture, toAdd:{...dataFacture.toAdd, quantite:Number(e.target.value)}})}  />
+                      <Input type="number" label="quantité" value={dataFacture?.toAdd?.quantite??"" as any} onChange={(e)=>setdataFacture({...dataFacture, toAdd:{...dataFacture.toAdd, quantite:(Number(e.target.value)>=0?Number(e.target.value):0)}})}  />
                     </div>
                     <div className="flex items-center justify-center">
-                      <button className="rounded-xl font-bold text-white bg-gray-800 p-2 py-3" onClick={AddtoFacture}> Ajouter</button>
+
+                      {dataFacture?.toAdd?.Produit?.quantite>dataFacture?.toAdd?.quantite ? <button className={"rounded-xl font-bold text-white bg-gray-800 p-2 py-3 "+(dataFacture?.toAdd?.quantite>0?"":"cursor-not-allowed")} onClick={AddtoFacture}> Ajouter</button>
+                        : <Tooltip showArrow={true} color="danger" content="Quantité insuffisante"><button className={"rounded-xl font-bold text-white bg-red-800 p-2 py-3 cursor-not-allowed"} > Ajouter</button></Tooltip>}
                     </div>
 
                   </Card>
@@ -472,7 +515,12 @@ export default function Facturation (){
                                 </PopoverTrigger>
                                 <PopoverContent>
                                     <div>
-                                      <Input label="Quantité" type="number" value={l.quantite as any} onInput={(e:any)=>{setdataFacture({...dataFacture, Lignes:dataFacture.Lignes.map((li:LigneFactureType)=>li.special_id==l.special_id?{...li, quantite:Number(e.target.value)}:li)})}} />
+                                      <Input label="Quantité" type="number"  value={l.quantite as any} onInput={ (e:any)=>{
+                                        console.log(e)
+                                        // const old = await Produit.get({special_id:l.Produit.special_id})
+                                        setdataFacture({...dataFacture, Lignes:dataFacture.Lignes.map((li:LigneFactureType)=>li.special_id==l.special_id?{...li, quantite:Number(e.target.value)}:li)})
+                                        updateProductQuantiteByLigne(l.Produit, Number(e.target.value), l)
+                                        }} />
                                     </div>
                                 </PopoverContent>
                               </Popover>
@@ -723,7 +771,7 @@ export default function Facturation (){
                     </TableHeader>
                     <TableBody>
                        {data.clients.map((client:ClientType, index)=>(
-                         <TableRow>
+                         <TableRow key={index}>
                          <TableCell>{index+1}</TableCell>
                          <TableCell>{client.name}</TableCell>
                          <TableCell>{client.tel}</TableCell>

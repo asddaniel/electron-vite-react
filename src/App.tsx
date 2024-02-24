@@ -17,14 +17,14 @@ import { models } from '@/utils/beast'
 import Rapport from './pages/Rapport'
 import { useAuth } from './utils/Store'
 
-import { Produit, Categorie, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison , CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine, User, Role } from './utils/Database'
-
+import { Produit, Depense as DataDepense, Categorie, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison , CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine, User, Role } from './utils/Database'
+import Depense from './pages/Depense'
 models.register({
   databaseName:"mtech", 
   version:1, 
   type: "indexedDB", 
   models: [User, Role, Categorie, Produit, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison,
-          CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine]
+          CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine, DataDepense]
 })
 
 
@@ -66,6 +66,7 @@ const actualiser = ()=>{
         <Route >
         <Route path='/C:/' element={auth.isLogged ? <Home />: <Login actualiser={actualiser} />} />
         <Route path='/C:/stock' element={auth.isLogged ? <Stock />: <Login actualiser={actualiser} />} />
+        <Route path='/C:/depense' element={auth.isLogged ? <Depense />: <Login actualiser={actualiser} />} />
         <Route path='/C:/rapport' element={auth.isLogged ? <Rapport />: <Login actualiser={actualiser} />} />
         <Route path='/C:/facturation' element={auth.isLogged ? <Facturation />: <Login actualiser={actualiser} />} />
         <Route path='/C:/users' element={auth.isLogged ? <Users />: <Login actualiser={actualiser} />} />
@@ -76,6 +77,7 @@ const actualiser = ()=>{
       ):(<Route>
         <Route path='/' element={auth.isLogged ? <Home /> : <Login actualiser={actualiser} />} />
         <Route path='/stock' element={auth.isLogged ? <Stock />: <Login actualiser={actualiser} />} />
+        <Route path='/depense' element={auth.isLogged ? <Depense />: <Login actualiser={actualiser} />} />
         <Route path='/rapport' element={auth.isLogged ? <Rapport />: <Login actualiser={actualiser} />} />
         <Route path='/facturation' element={auth.isLogged? <Facturation />: <Login actualiser={actualiser} />} />
         <Route path='/users' element={auth.isLogged ? <Users />: <Login actualiser={actualiser} />} />

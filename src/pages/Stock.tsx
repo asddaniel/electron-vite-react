@@ -398,6 +398,13 @@ export default function Stock (){
                 title: "Ajouté!",
                 text: "l'approvisionnement a été ajouté avec succès.",
                 icon: "success"})
+                .then(()=>{
+                    setFilterDate({
+                        startDate:new Date(Date.now()-86400000),
+                        endDate:new Date()
+                    })
+                })
+                
         }
 
     }
@@ -472,6 +479,7 @@ export default function Stock (){
             if(numbercode.length<approvisionnement.quantite){
                 setisloading(true);
                 const numbertoadd = approvisionnement.quantite - numbercode.length;
+                const generated:CodeBarreType[] = []
                 for(let i=0;i<numbertoadd;i++){
                     //generate random alphanumeric string of length 10
                     const all = await CodeBarre.all();
@@ -490,11 +498,14 @@ export default function Stock (){
                 toadd.created_at = new Date()
                 toadd.Approvisionnement.created_at = approvisionnement.created_at;
                     const code = await CodeBarre.create(toadd)
-                    setlocaldata({
-                        ...localdata,
-                        codebarres:[...localdata.codebarres, code]
-                    })
+                    generated.push(code);
+                   
                 }
+
+                setlocaldata({
+                    ...localdata,
+                    codebarres:[...localdata.codebarres, ...generated]
+                })
                 
                 Swal.fire({
                     title:"Réussi", 

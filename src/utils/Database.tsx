@@ -128,7 +128,7 @@ export class Reduction extends models.Model{
     id = models.IntegerField({primaryKey: true})
     is_deleted = models.BooleanField({default: false})
     montant = models.BigIntegerField()
-    facture = models.ForeignKey({model:Facture})
+    Facture = models.ForeignKey({model:Facture})
     pourcentage = models.IntegerField()
     created_at = models.DateTimeField({blank:true})
     updated_at = models.DateTimeField({blank:true})
@@ -175,6 +175,30 @@ export class Fournisseur extends models.Model {
      special_id = models.CharField({maxLength: 100})
 
 }
+
+export class Depense extends models.Model {
+    id = models.IntegerField({primaryKey: true})
+    libelle = models.CharField({maxLength:255})
+    montant = models.BigIntegerField()
+    description = models.TextField()
+    is_deleted = models.BooleanField({default: false})
+    created_at = models.DateTimeField({blank:true})
+    updated_at = models.DateTimeField({blank:true})
+    deleted_at = models.DateTimeField({blank:true})
+    special_id = models.CharField({maxLength: 100})
+}
+
+export type DepenseType = {
+    id?:number;
+    montant?:number;
+    libelle?:string;
+    description?:string;
+    created_at?:Date | string;
+    updated_at?:Date | string;
+    deleted_at?:Date | string;
+    is_deleted?:boolean;
+    special_id:string;
+}
 export type FournisseurType = {
     id?:number;
     name:string;
@@ -191,7 +215,7 @@ export class Approvisionnement extends models.Model {
     id = models.IntegerField({primaryKey: true})
     Fournisseur = models.ForeignKey({model: Fournisseur})
     Produit = models.ForeignKey({model:Produit})
-    quantite = models.IntegerField({primaryKey: true})
+    quantite = models.IntegerField()
     prix = models.BigIntegerField()
     description = models.TextField()
     is_deleted = models.BooleanField({default: false})
@@ -380,6 +404,6 @@ export class LigneFacture extends models.Model {
     version:1, 
     type: "indexedDB", 
     models: [User, Role, Categorie, Produit, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison,
-            CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine]
+            CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine, Depense]
  })
  //models.migrate();

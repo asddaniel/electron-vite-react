@@ -93,6 +93,7 @@ export  function Livraison(){
           }
         Promise.all([Livr.all(), LivraisonLine.all(), Facture.all(), Produit.all(), CodeBarre.all()])
         .then(([livraisons, lines, factures, produits, codes])=>{
+            console.log(livraisons, lines, factures)
             livraisons = livraisons.filter(l=>l.is_deleted==false);
             lines = lines.filter(l=>l.is_deleted==false);
             factures = factures.filter(l=>l.is_deleted==false);
@@ -143,6 +144,7 @@ export  function Livraison(){
                 } as any
             })
             setmodalLivraison(false);
+            setdatasearch({...datasearch, time:{...datasearch.time, endDate:new Date()}})
             return
                 
             }
@@ -287,11 +289,13 @@ export  function Livraison(){
                             className="py-2"
                             label="numfacture"
                             value={search.facture}
-                            onChange={(e) => setsearch({ ...search, facture: e.target.value })}
+                            onChange={(e) =>{ setsearch({ ...search, facture: e.target.value })
+                            console.log(e.target.value, localdata?.factures)
+                        }}
                         />
                         <div className="py-2">
                             {search.facture.length>0 && (datatoAdd.livraison?.Facture?.numfacture!=search.facture || datatoAdd.livraison.Facture==null) && localdata.factures.filter(f=>f.numfacture?.includes(search.facture)).map((facture)=>{
-                                return <div className="my-2 bg-white shadow-sm cursor-pointer " onClick={(e) =>{
+                                return <div key={facture.special_id} className="my-2 bg-white shadow-sm cursor-pointer " onClick={(e) =>{
 
                                     console.log(e)
                                     setsearch({...search, facture:(facture.numfacture as string)?.toString()})

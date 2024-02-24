@@ -17,13 +17,16 @@ export default function Login( {actualiser}:{actualiser:()=>void}) {
    useEffect(()=>{
        User.all().then(res=>{
         res = res.filter(r=>r.is_deleted == false);
+        console.log(res)
         setusers(res)
        })
        initializeDefaultUser();
    }, [])
    const connexion = async ()=>{
             if(datalogin.email.length > 0 && datalogin.password.length > 0){
-                const user = users.find((u)=>u.email == datalogin.email || u.telephone == datalogin.email)
+                const all = await User.all()
+                setusers(all.filter(user=>user.is_deleted==false));
+                const user = all.find((u)=>u.email == datalogin.email || u.telephone == datalogin.email)
                 if(user){
                     const is_valid = await bcrypt.compare(datalogin.password, user.password)
                     if(is_valid){
