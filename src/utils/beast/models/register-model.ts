@@ -33,17 +33,25 @@ export const modelsConfigLocalStorage: {[key:string]: {
 
 
 export function migrate(register: register) {
-  if(register.type == 'indexedDB') {
-    registerModel.register(register)
-  } else if (register.type == 'localStorage') {
-    registerLocalStorage.register(register)
+  console.log("je suis dans le migrate")
+  try{
+    console.log(register, "register")
+    if(register.type == 'indexedDB') {
+      registerModel.register(register)
+    } else if (register.type == 'localStorage') {
+      registerLocalStorage.register(register)
+    }
   }
+  catch(err){
+       console.log(err)
+  }
+  
 }
 export class registerModel {
-  static async register(entries: register) {
-    
+  static async register(entries: register|null) {
+   console.log("ligne 52", entries)
     const databaseSchema : DatabaseSchema  = {
-      databaseName: entries.databaseName || uniqueGenerator(),
+      databaseName: entries?.databaseName || uniqueGenerator(),
       version: entries.version,
       type: entries.type,
       stores: []
@@ -51,6 +59,7 @@ export class registerModel {
 
 
     for (const modelClassRepresentations of entries.models) {
+      
       const ModelName = modelClassRepresentations.getModelName()
       models[ModelName] = modelClassRepresentations 
 
@@ -75,7 +84,7 @@ export class registerModel {
       })
 
       
-
+console.log("ligne 87")
       for(const [fieldName, Field] of  Object.entries(fields)) {
         // dont register fields that is primary key and auto increment
         if(!(Field?.primaryKey && Field?.autoIncrement  ) && !fieldTypes['ManyToManyField']?.includes(fieldName) ) {
@@ -98,7 +107,7 @@ export class registerModel {
           })
 
         }
-
+        console.log("ligne 110")
         if(Field instanceof OneToOneField) {
           await ModelEditor.addMethodOneToOneField(Field, fieldName, modelName, databaseSchema)
         } else if (Field instanceof ForeignKey) {
@@ -114,32 +123,43 @@ export class registerModel {
 
 
     let tableSchema_
+    console.log(entries, "entries faite ligne 126")
+    console.log("databaseSchema", databaseSchema)
     for(const modelClassRepresentations of entries.models) {
       const ModelName = modelClassRepresentations.getModelName()
+      console.log(ModelName, "ModelName ligne 130")
       models[ModelName] = modelClassRepresentations
 
       const tableSchema = databaseSchema.stores.find((e)=> e.name == ModelName)
+      console.log(tableSchema)
+      if(tableSchema) {
+        console.log("execution table schema")
       tableSchema_ = tableSchema
 
       modelsConfig[ModelName] = {
         DatabaseSchema: databaseSchema,
         TableSchema: tableSchema
       }
-
-      ModelMigrations.prepare(databaseSchema.databaseName)
       try {
+      ModelMigrations.prepare(databaseSchema?.databaseName)
+     
         transactionOnCommit.prepare(modelClassRepresentations as any)
       } catch (error) {
         console.log(error)
-      }
+      }}
       // transactionOnCommit.prepare(modelClassRepresentations as any)
     }
 
-
+    console.log("tableSchema_ ligne 147", tableSchema_)
     if(databaseSchema.type =='indexedDB') {
-      await IndexedDB.run(databaseSchema)
-      await ModelAPIRequest.obj(databaseSchema, tableSchema_ ).migrate()
-      ModelMigrations.migrationsState(databaseSchema.databaseName, true);
+      try{
+        await IndexedDB.run(databaseSchema)
+        await ModelAPIRequest.obj(databaseSchema, tableSchema_ ).migrate()
+        ModelMigrations.migrationsState(databaseSchema?.databaseName, true);
+      }catch(err){
+        console.log(err)
+      }
+      
     }
     
   }
@@ -190,7 +210,7 @@ export class registerModel {
       ModelName: tableName,
       TableSchema: databaseSchema.stores[id]
     })
-
+     console.log("ligne 202", tableName)
     return generateGenericModel({
       DBSchema: databaseSchema,
       ModelName: tableName,

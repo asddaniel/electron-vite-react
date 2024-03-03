@@ -41,7 +41,7 @@ export default function Caisse () {
         taux:2800
     })
     useEffect(()=>{
-        if(![0, 1, 5].includes(Number(auth.user.role))){
+        if(![0, 1, 5, 7].includes(Number(auth.user.role))){
             route("/")
         }
             Promise.all([Paiement.all(), Facture.all()])

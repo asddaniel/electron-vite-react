@@ -15,6 +15,7 @@ export default function Login( {actualiser}:{actualiser:()=>void}) {
        password:""
    })
    useEffect(()=>{
+    console.log("users")
        User.all().then(res=>{
         res = res.filter(r=>r.is_deleted == false);
         console.log(res)
@@ -23,14 +24,17 @@ export default function Login( {actualiser}:{actualiser:()=>void}) {
        initializeDefaultUser();
    }, [])
    const connexion = async ()=>{
+    console.log("ok")
             if(datalogin.email.length > 0 && datalogin.password.length > 0){
                 const all = await User.all()
                 setusers(all.filter(user=>user.is_deleted==false));
                 const user = all.find((u)=>u.email == datalogin.email || u.telephone == datalogin.email)
+                console.log(user)
                 if(user){
                     const is_valid = await bcrypt.compare(datalogin.password, user.password)
                     if(is_valid){
                         localStorage.setItem("user", JSON.stringify(user))
+                        localStorage.setItem("connected_at", new Date().toLocaleDateString().split("/").reverse().join("-"))
                         setAuth({isLogged:true, user:user})
                         actualiser()
                         Swal.fire({
@@ -47,6 +51,12 @@ export default function Login( {actualiser}:{actualiser:()=>void}) {
                             icon:"error", 
                         })
                     }
+            }else{
+                Swal.fire({
+                    title:"Oops..", 
+                    icon:"error", 
+                    text:"Utilisateur non trouvée...",
+                })
             }
             return;
         }

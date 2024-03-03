@@ -17,15 +17,11 @@ import { models } from '@/utils/beast'
 import Rapport from './pages/Rapport'
 import { useAuth } from './utils/Store'
 
-import { Produit, Depense as DataDepense, Categorie, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison , CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine, User, Role } from './utils/Database'
+import Params from './pages/Params'
 import Depense from './pages/Depense'
-models.register({
-  databaseName:"mtech", 
-  version:1, 
-  type: "indexedDB", 
-  models: [User, Role, Categorie, Produit, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison,
-          CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine, DataDepense]
-})
+import { retrieveLocalData } from './utils/Database'
+import { syncronize } from './utils/Facade'
+
 
 
 const isproductionroute = /^\/[A-Z]:\//;
@@ -43,12 +39,27 @@ const actualiser = ()=>{
  useEffect(()=>{
    const user = localStorage.getItem("user")
    if(user){
+    let connected_at = localStorage.getItem("connected_at")
+    if(connected_at){
+      const now = new Date()
+      const yesterday = new Date(connected_at)
+      if(now.getTime() > yesterday.getTime()+86400000){
+        localStorage.removeItem("user")
+        return 
+      }
+    }
      setAuth({isLogged:true, user:JSON.parse(user)})
      console.log(auth, user)
    }
-   
- }, [reloadstate])
+  //  retrieveLocalData()
+  setInterval(()=>{
+    syncronize() 
+  }, 60000)
   
+
+ }, [reloadstate])
+
+
   return (
     <NextUIProvider>
          <motion.div layout className='grid grid-cols-9 gap-1 font-sans px-8 lg:px-1 font-sans'>
@@ -73,6 +84,7 @@ const actualiser = ()=>{
         <Route path='/C:/login' element={<Login actualiser={actualiser} />} />
         <Route path='/C:/caisse' element={auth.isLogged ? <Caisse />: <Login actualiser={actualiser} />} />
         <Route path='/C:/livraison' element={auth.isLogged ? <Livra/>: <Login actualiser={actualiser} />} />
+        <Route path='/C:/params' element={auth.isLogged ? <Params />: <Login actualiser={actualiser} />} />
       </Route>
       ):(<Route>
         <Route path='/' element={auth.isLogged ? <Home /> : <Login actualiser={actualiser} />} />
@@ -83,6 +95,8 @@ const actualiser = ()=>{
         <Route path='/users' element={auth.isLogged ? <Users />: <Login actualiser={actualiser} />} />
         <Route path='/login' element={<Login actualiser={actualiser} />} />
         <Route path='/caisse' element={auth.isLogged ? <Caisse />: <Login actualiser={actualiser} />} />
+        <Route path='/params' element={auth.isLogged ? <Params />: <Login actualiser={actualiser} />} />
+
         <Route path='/livraison' element={auth.isLogged ? <Livra />: <Login actualiser={actualiser} />} />
       </Route>)}
               {/* <Route>

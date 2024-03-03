@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, Menu } from 'electron'
 import { release } from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -34,6 +34,11 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0)
 }
 
+// const menu = Menu.getApplicationMenu(); // get default menu
+
+// menu?.items.find((item) => item?.role === "help").visible = false; // modify it
+
+// Menu.setApplicationMenu(menu)
 // Remove electron security warnings
 // This warning only shows in development mode
 // Read more on https://www.electronjs.org/docs/latest/tutorial/security
@@ -123,4 +128,9 @@ ipcMain.handle('open-win', (_, arg) => {
     childWindow.loadFile(indexHtml, { hash: arg })
   }
 })
+
+const newMenu = Menu.buildFromTemplate([
+  
+])
+Menu.setApplicationMenu(newMenu)
 

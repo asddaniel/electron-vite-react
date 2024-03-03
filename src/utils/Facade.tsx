@@ -1,5 +1,6 @@
-import { User } from "./Database";
+import { User, retrieveLocalData } from "./Database";
 import bcrypt from "bcryptjs"
+import { useConfig } from "./Store";
 
 export const initializeDefaultUser = async ()=>{
  const all = await User.all();
@@ -61,4 +62,56 @@ export const getPageStyle = ()=>{
     }
   
     return result;
+  }
+
+  import { runUpdates } from "./Database";
+  export const syncronize = ()=>{
+
+    // const {config}:any = useConfig();
+    const serveur = localStorage.getItem("config-server")??"http://localhost:8000"
+    
+    retrieveLocalData()
+    .then(local=>{
+      fetch(serveur+"/api/syncronize", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body:JSON.stringify({data:local, last_modified:(new Date(localStorage.getItem("sync_date")??new Date().toLocaleDateString().split("/").reverse().join("-")))}), 
+      }).then((response)=>response.json())
+      .then(response=>{
+       runUpdates(response)
+       localStorage.setItem("sync_date", JSON.stringify(new Date().toLocaleDateString().split("/").reverse().join("-")))
+       
+        console.log(response)
+      
+      })
+
+    })
+    .catch(error=>console.log(error))
+    
+    
+    
+    // return <div></div>
+  }
+
+  export const makerequest = ({data, method, dataName})=>{
+    const {config}:any = useConfig();
+    if(config.frequence =="immediat"){
+       fetch(config.server+"/"+dataName, {method:method, body:data})
+       .then(res=>res.json())
+       .then(res=>console.log(res))
+      return
+    }
+    if(config.frequence == "journalier"){
+
+    }
+    if(config.frequence == "hebdomadaire"){
+
+    }
+
+    if(config.frequence == "par heure" ){
+
+    }
+
   }

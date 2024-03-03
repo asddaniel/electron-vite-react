@@ -1,9 +1,9 @@
 {
-  "name": "mtech-gestion",
+  "name": "mtech",
   "version": "1.0.0",
   "main": "dist-electron/main/index.js",
-  "description": "Electron Vite React boilerplate.",
-  "author": "草鞋没号 <308487730@qq.com>",
+  "description": "Gestion de stock.",
+  "author": "devasddaniel@gmail.com",
   "license": "MIT",
   "private": true,
   "debug": {
@@ -25,11 +25,13 @@
     "bcryptjs": "^2.4.3",
     "beast-orm": "^1.1.5",
     "bwip-js": "^4.2.0",
+    "chart.js": "^4.4.2",
     "dexie": "^3.2.5",
     "dexie-react-hooks": "^1.1.7",
     "electron-updater": "^6.1.1",
     "framer-motion": "^11.0.3",
     "lucide-react": "^0.323.0",
+    "react-chartjs-2": "^5.2.0",
     "react-router-dom": "^6.22.0",
     "react-tailwindcss-datepicker": "^1.6.6",
     "react-to-print": "^2.15.1",
@@ -43,7 +45,7 @@
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.4",
     "autoprefixer": "^10.4.17",
-    "electron": "^28.1.0",
+    "electron": "^28.2.4",
     "electron-builder": "^24.6.3",
     "postcss": "^8.4.35",
     "react": "^18.2.0",
@@ -51,7 +53,7 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.1.6",
     "vite": "^5.0.10",
-    "vite-plugin-electron": "^0.28.0",
+    "vite-plugin-electron": "^0.28.2",
     "vite-plugin-electron-renderer": "^0.14.5"
   }
 }

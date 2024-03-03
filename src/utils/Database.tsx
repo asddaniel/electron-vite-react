@@ -399,11 +399,108 @@ export class LigneFacture extends models.Model {
 
   
 
+  console.log("registration")
  models.register({
-    databaseName:"mtech", 
+    databaseName:"mastertech", 
     version:1, 
     type: "indexedDB", 
     models: [User, Role, Categorie, Produit, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison,
             CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine, Depense]
  })
  //models.migrate();
+
+ interface DataUpdate {
+    [key: string]: any[];
+}
+
+export function filterByCommonProperty(arr1:DataUpdate[], arr2:DataUpdate[], propertyName:string):any[] {
+    const merged = [...arr1, ...arr2];
+    let identiqueIndex = merged.map(m=>m[propertyName]);
+    const toIndex = identiqueIndex
+    let all = identiqueIndex.filter(m=>{
+        return toIndex.filter(i=>i == m).length>=2 
+    });
+   //console.log(all, toIndex);
+   ///all=3;
+
+    return merged.filter(m=>all.includes(m[propertyName]))
+}
+const tableList = [
+    "User", "Role", "Categorie", "Produit", "Client", "Facture", "Fournisseur", "Approvisionnement", "LigneFacture", "Livraison",
+            "CodeBarre", "RoleUser", "Reduction", "Paiement", "LivraisonLine", "Depense"
+]
+const alltable = [
+    User, Role, Categorie, Produit, Client, Facture, Fournisseur, Approvisionnement, LigneFacture, Livraison,
+            CodeBarre, RoleUser, Reduction, Paiement, LivraisonLine, Depense
+]
+export const retrieveLocalData = async()=>{
+
+    const last_modified = new Date(localStorage.getItem("sync_date")??"2022-01-01T00:00:00")
+    console.log(last_modified)
+    let data:any = {}
+    const list = await Promise.all(alltable.map(async(m)=>{
+        const result = (await m.all()).filter(d=>(d.created_at as Date).getTime() >last_modified.getTime()  || (d.updated_at as Date) >last_modified);
+        let response:any = {}
+        response[m.getModelName()] = result;
+        data[m.getModelName()] = result;
+        return response;
+    }))
+   
+    
+    console.log(data)
+  return data;
+}
+
+const allTables = {"user":User, "role":Role, "categorie":Categorie, "produit":Produit, "client":Client, "facture":Facture, "fournisseur":Fournisseur, "approvisionnement":Approvisionnement, "ligne_facture":LigneFacture, "livraison":Livraison,
+    "codebarre":CodeBarre, "roleuser":RoleUser, "reduction":Reduction, "paiement":Paiement, "livraisonline":LivraisonLine, "depense":Depense}
+export const  runUpdates = async(dataList:DataUpdate)=>{
+    const toUpdate:any[] = []
+    const toInsert:any[] = []
+        for (let key in dataList) {
+            if (dataList.hasOwnProperty(key) && Object.keys(alltable).includes(key)) {
+                console.log(`Clé: ${key}`);
+    
+                // console.log(dataList[key])
+                alltable[key].all()
+            .then((listData:any[])=>{
+                const identiques = filterByCommonProperty(dataList[key], listData, "special_id")
+                for(let i=0;i<identiques.length/2;i++){
+    
+                    if(new Date(identiques[i]?.updatedAt) > identiques[(identiques.length/2)+i]?.updatedAt){
+                        console.log(identiques[i], identiques[(identiques.length/2)+i]);
+                        toUpdate.push(identiques[i]);
+                        alltable[key].filter({special_id:identiques[i].special_id}).update({...identiques[i], updatedAt:new Date(identiques[i].updatedAt)});
+                    }
+                }
+                const spids = identiques.map(i=>i.special_id);
+                const nonidentiques = dataList[key].filter((data:any)=>!spids.includes(data.special_id));
+                console.log(identiques, dataList[key])
+                toInsert.concat(nonidentiques)
+                alltable[key].bulkAdd(nonidentiques.map(nn=>{
+                    return {...nn, udpdatedAt:new Date(nn.updatedAt)}
+                }))
+                nonidentiques.forEach(async (element) => {
+                    await alltable[key].create(element)
+                });
+            })
+            }
+        }
+        console.log(toUpdate, toInsert);
+        return true
+    
+        // dataList.data.forEach((data)=>{
+        //     db.table(data).toArray()
+        //     .then((listData:any[])=>{
+        //         const identiques = filterByCommonProperty(data.data, listData, "special_id")
+        //         for(let i=0;i<identiques.length/2;i++){
+        //             if(new Date(identiques[i].createdAt) > identiques[i*2].createdAt){
+        //                console.log(identiques[i]);
+    
+        //                 //db.table(data.table).where({special_id:identiques[i].special_id}).modify({is_deleted:true})
+        //             }
+        //         }
+        //     })
+        // });
+    
+        
+    }
